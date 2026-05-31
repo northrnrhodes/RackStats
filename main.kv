@@ -2,6 +2,7 @@
 #:include kv_files/home-screen.kv
 #:include kv_files/stats-screen.kv
 #:include kv_files/startup-screen.kv
+#:include kv_files/choose-game-screen.kv
 
 
 
@@ -22,3 +23,11 @@ GridLayout:
         StatsScreen:
             id: stats_screen
             name: "stats_screen"
+
+        ChooseGameScreen:
+            id: choose_game
+            name: "choose_game"
+
+        SettingsScreen:
+            id: settings_screen
+            name: "settings_screen"

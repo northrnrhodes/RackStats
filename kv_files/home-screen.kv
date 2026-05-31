@@ -76,8 +76,6 @@
 
                 size_hint: None, None
                 size: dp(180), dp(60)
-
-
                 pos_hint: {'center_x': 0.5}
 
 
@@ -95,11 +93,13 @@
 
             GoldButton:
                 text: 'Play a Game'
-                on_release: app.change_screen("startup_screen")
+                on_release: app.change_screen("choose_game")
             GoldButton:
                 text: 'Stats'
+                on_release: app.change_screen("stats_screen")
             GoldButton:
                 text: 'Settings'
+                on_release: app.change_screen("settings_screen")
 
           # 3. BOTTOM SPACER (Pushes footer down)
         Widget:

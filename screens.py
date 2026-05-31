@@ -9,3 +9,9 @@ class StatsScreen(Screen):
 
 class StartupScreen(Screen):
     pass
+
+class SettingsScreen(Screen):
+    pass
+
+class ChooseGameScreen(Screen):
+    pass

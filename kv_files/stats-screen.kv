@@ -1,10 +1,69 @@
 #:import utils kivy.utils
 
-
-#match homescreen class from main.py
 <StatsScreen>
-    Button:
-        text:
-            "Statistics coming soon!"
-        on_release:
-            app.change_screen("home_screen")
+    # Set the dark blue background for the entire screen
+    canvas.before:
+        Color:
+            rgba: utils.get_color_from_hex('#102A44')
+        Rectangle:
+            size: self.size
+            pos: self.pos
+    #main container for image buttons and screen spacing
+    BoxLayout:
+        orientation: 'vertical'
+
+        # 1. TOP SAFE AREA (Notch padding)
+        Widget:
+            size_hint_y: None
+            height: dp(20)
+
+        Label:
+            pos_hint: {"top": .9, "left": 1}
+
+            text: 'Stats Coming Soon!'
+            color: utils.get_color_from_hex('#846835')
+            font_size: dp(25)
+
+
+        #back to homescreen button
+        Button:
+            text: "Back"
+            on_release: app.change_screen("home_screen", 'right')
+            # Remove the default Kivy grey button background
+            background_color: 0, 0, 0, 0
+            background_normal: ''
+
+            # 2. The suppressed tap animation
+            opacity: 0.6 if self.state == 'down' else 1.0
+
+            # Text styling (Dark blue text to match the app background)
+            color: utils.get_color_from_hex('#102A44')
+            bold: True
+            font_size: '22sp'
+
+            # Sizing (Fixed size so they look uniform)
+            size_hint: None, None
+            size: dp(180), dp(80)
+            pos_hint: {'center_x': 0.5}
+
+            # Drawing the rounded rectangle and border
+            canvas.before:
+                Color:
+                    rgba: utils.get_color_from_hex('#846835')
+                RoundedRectangle:
+                    size: self.size
+                    pos: self.pos
+                    radius: [dp(15)] # The curve of the corners
+
+                # Optional: Adds the thin light border seen in your mockup
+                Color:
+                    rgba: 1, 1, 1, 0.6
+                Line:
+                    width: dp(1.0)
+                    rounded_rectangle: (self.x, self.y, self.width, self.height, dp(15))
+
+
+
+         # 5. BOTTOM SAFE AREA (Fills remaining space to push everything up slightly)
+        Widget:
+            size_hint_y: .5
