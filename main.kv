@@ -1,0 +1,24 @@
+#:include kv_files/settings-screen.kv
+#:include kv_files/home-screen.kv
+#:include kv_files/stats-screen.kv
+#:include kv_files/startup-screen.kv
+
+
+
+GridLayout:
+    cols: 1
+
+    ScreenManager:
+        id: screen_manager
+
+        StartupScreen:
+            id: startup_screen
+            name: "startup_screen"
+
+        HomeScreen:
+            id: home_screen
+            name: "home_screen"
+
+        StatsScreen:
+            id: stats_screen
+            name: "stats_screen"

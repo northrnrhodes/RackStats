@@ -1,0 +1,121 @@
+#:import utils kivy.utils
+
+# --- CUSTOM BUTTON DESIGN ---
+<GoldButton@Button>:
+    # Remove the default Kivy grey button background
+    background_color: 0, 0, 0, 0
+    background_normal: ''
+
+    # 2. The suppressed tap animation
+    opacity: 0.6 if self.state == 'down' else 1.0
+
+    # Text styling (Dark blue text to match the app background)
+    color: utils.get_color_from_hex('#102A44')
+    bold: True
+    font_size: '22sp'
+
+    # Sizing (Fixed size so they look uniform)
+    size_hint: None, None
+    size: dp(260), dp(100)
+    pos_hint: {'center_x': 0.5}
+
+    # Drawing the rounded rectangle and border
+    canvas.before:
+        Color:
+            rgba: utils.get_color_from_hex('#846835')
+        RoundedRectangle:
+            size: self.size
+            pos: self.pos
+            radius: [dp(15)] # The curve of the corners
+
+        # Optional: Adds the thin light border seen in your mockup
+        Color:
+            rgba: 1, 1, 1, 0.6
+        Line:
+            width: dp(1.0)
+            rounded_rectangle: (self.x, self.y, self.width, self.height, dp(15))
+
+# --- MAIN SCREEN LAYOUT ---
+<HomeScreen>:
+    # Set the dark blue background for the entire screen
+    canvas.before:
+        Color:
+            rgba: utils.get_color_from_hex('#102A44')
+        Rectangle:
+            size: self.size
+            pos: self.pos
+
+    BoxLayout:
+        orientation: 'vertical'
+
+        # 1. TOP SAFE AREA (Notch padding)
+        Widget:
+            size_hint_y: None
+            height: dp(60)
+
+        # 2. LOGO IMAGES
+        BoxLayout:
+            orientation: 'vertical'
+            size_hint_y: None
+            height: dp(200)  # Adjust this total height based on your image sizes
+            spacing: dp(-15)
+
+            Image:
+                source: 'images/rackemSticker_final.png'
+                allow_stretch: True
+                keep_ratio: True
+                size_hint: None, None
+                size: dp(280), dp(120)
+
+                pos_hint: {'center_x': 0.5}
+
+            Image:
+                source: 'images/scorekeeperSticker_final.png'
+                allow_stretch: True
+                keep_ratio: True
+
+                size_hint: None, None
+                size: dp(180), dp(60)
+
+
+                pos_hint: {'center_x': 0.5}
+
+
+        # 3. MIDDLE SPACER (Pushes buttons down)
+        Widget:
+            size_hint_y: None
+            height: dp(80)
+
+        # 4. BUTTONS
+        BoxLayout:
+            orientation: 'vertical'
+            spacing: dp(35) # Space between the buttons
+            size_hint_y: None
+            height: self.minimum_height
+
+            GoldButton:
+                text: 'Play a Game'
+                on_release: app.change_screen("startup_screen")
+            GoldButton:
+                text: 'Stats'
+            GoldButton:
+                text: 'Settings'
+
+          # 3. BOTTOM SPACER (Pushes footer down)
+        Widget:
+            size_hint_y: None
+            height: dp(130)
+
+        #footer container with version number
+        BoxLayout:
+            orientation: 'vertical'
+            height: self.minimum_height
+            Label:
+                text: "v 1.0.0 Kivy Framework"
+                font_size: 35
+                color: (0.5, 0.5, 0.5, 1)
+
+
+        # 5. BOTTOM SAFE AREA (Fills remaining space to push everything up slightly)
+        Widget:
+            size_hint_y: .5

@@ -1,0 +1,16 @@
+#:import utils kivy.utils
+<StartupScreen>
+    FloatLayout:
+        canvas.before:
+            Color:
+                rgb: utils.get_color_from_hex('#102A44')
+            Rectangle:
+                pos: self.pos
+                size: self.size
+
+        Image:
+            source: 'images/rackemSticker.png'
+            pos_hint: {'center_x':0.5, 'center_y': 0.6}
+        Image:
+            source: 'images/scorekeeperSticker.png'
+            pos_hint: {'center_x':0.5, 'center_y': 0.5}
