@@ -4,7 +4,7 @@
     # Set the dark blue background for the entire screen
     canvas.before:
         Color:
-            rgba: utils.get_color_from_hex('#102A44')
+            rgba: utils.get_color_from_hex(app.main_color)
         Rectangle:
             size: self.size
             pos: self.pos
@@ -28,11 +28,11 @@
                 size_hint: 1, .1
                 text: "Game Type:"
                 font_size: dp(25)
-                color: utils.get_color_from_hex('#846835')
+                color: utils.get_color_from_hex(app.accent_color)
 
             Widget:
                 size_hint_y: None
-                height: dp(20)
+                height: dp(75)
 
             #8Ball button
             Button:
@@ -41,23 +41,27 @@
 
                 # 2. The suppressed tap animation
                 opacity: 0.6 if self.state == 'down' else 1.0
-                on_release: app.change_screen("home_screen")
+                on_release: app.get_game_type("8_ball")
+
 
                 # Sizing (Fixed size so they look uniform)
                 size_hint: None, None
-                size: dp(170), dp(160)
+
+               #width/height
+                size: dp(142), dp(145)
                 pos_hint: {'center_x': 0.5}
 
                 # set bg color
                 canvas.before:
                     Color:
-                        rgba: utils.get_color_from_hex('#102A44')
+                        rgba: utils.get_color_from_hex(app.main_color)
 
                 Image:
                     source: 'images/8Ball.png'
                     allow_stretch: True
                     keep_ratio: True
-                    size: dp(250), dp(250)  # Adjust to fit your button
+                    #width/height
+                    size: dp(200), dp(200)  # Adjust to fit your button
                     # This keeps the image centered in the button automatically
                     center_x: self.parent.center_x
                     center_y: self.parent.center_y
@@ -73,23 +77,25 @@
 
                 # 2. The suppressed tap animation
                 opacity: 0.6 if self.state == 'down' else 1.0
-                on_release: app.change_screen("home_screen")
+                on_release: app.get_game_type("9_ball")
 
                 # Sizing (Fixed size so they look uniform)
                 size_hint: None, None
-                size: dp(170), dp(160)
+                 #width/height
+                size: dp(142), dp(145)
                 pos_hint: {'center_x': 0.5}
 
                 # set bg color
                 canvas.before:
                     Color:
-                        rgba: utils.get_color_from_hex('#102A44')
+                        rgba: utils.get_color_from_hex(app.main_color)
 
                 Image:
                     source: 'images/9Ball.png'
                     allow_stretch: True
                     keep_ratio: True
-                    size: dp(250), dp(250)  # Adjust to fit your button
+                     #width/height
+                    size: dp(200), dp(200)  # Adjust to fit your button
                     # This keeps the image centered in the button automatically
                     center_x: self.parent.center_x
                     center_y: self.parent.center_y
@@ -97,7 +103,7 @@
             #button spacer
             Widget:
                 size_hint_y: None
-                height: dp(5)
+                height: dp(50)
 
             #back to homescreen button
             Button:
@@ -111,19 +117,22 @@
                 opacity: 0.6 if self.state == 'down' else 1.0
 
                 # Text styling (Dark blue text to match the app background)
-                color: utils.get_color_from_hex('#102A44')
+                color: utils.get_color_from_hex(app.main_color)
                 bold: True
                 font_size: '22sp'
+                font_name: "fonts/Avenir Next.ttc"
 
                 # Sizing (Fixed size so they look uniform)
                 size_hint: None, None
-                size: dp(180), dp(80)
+
+                #width/height
+                size: dp(160), dp(60)
                 pos_hint: {'center_x': 0.5}
 
                 # Drawing the rounded rectangle and border
                 canvas.before:
                     Color:
-                        rgba: utils.get_color_from_hex('#846835')
+                        rgba: utils.get_color_from_hex(app.accent_color)
                     RoundedRectangle:
                         size: self.size
                         pos: self.pos
@@ -140,4 +149,4 @@
 
         # 5. BOTTOM SAFE AREA (Fills remaining space to push everything up slightly)
         Widget:
-            size_hint_y: .5
+            size_hint_y: .4

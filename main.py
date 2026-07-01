@@ -1,24 +1,29 @@
 from kivy.app import App
-
 from kivy.lang import Builder
-from kivy.config import Config
 from kivy.clock import Clock
-from kivy.uix.button import Button
-from screens import HomeScreen, StatsScreen, StartupScreen, Screen, ChooseGameScreen, SettingsScreen
+import screens
 from kivy.core.window import Window
+from kivy.properties import ListProperty, StringProperty, NumericProperty, BooleanProperty
 
-Window.size = (390, 844)
 
-#smooths out screen transition
+#comment out this code before building in xcode
+Window.size = (430, 932)
+
+# smooths out screen transition
 Window.clearcolor = (16/255, 42/255, 68/255, 1)
-#set kivy run window size
-Config.set('graphics', 'width', '430')
-Config.set('graphics', 'height', '932')
-Config.set('graphics', 'resizable', '1')
-
-GUI = Builder.load_file('main.kv')
 
 class BilliardsScorekeeping(App):
+    #global app variables
+    game_type = StringProperty('')
+    players = ListProperty([])
+    score = NumericProperty(0)
+    player1 = StringProperty('')
+    player2 = StringProperty('')
+
+    #color themes
+    main_color = StringProperty('#102A44') #darkblue
+    accent_color = StringProperty('#A48B5D') #gold
+
     def on_start(self):
         Clock.schedule_once(self.switch_to_menu, 2.0)
 
@@ -28,6 +33,7 @@ class BilliardsScorekeeping(App):
         self.root.ids['screen_manager'].current = 'home_screen'
 
     def build(self):
+        GUI = Builder.load_file('main.kv')
         return GUI
 
     def change_screen(self, screen_name, direction='left'):
@@ -35,6 +41,15 @@ class BilliardsScorekeeping(App):
         screen_manager.transition.duration = .25
         screen_manager.transition.direction = direction
         screen_manager.current = screen_name
+        # screen = self.root.ids.game_setup_screen
+
+    def get_game_type(self, game):
+        self.game_type = game
+        self.change_screen('setup_screen')
+        print(self.game_type)
+        print(self.score)
+
+
 
 if __name__ == '__main__':
     BilliardsScorekeeping().run()
