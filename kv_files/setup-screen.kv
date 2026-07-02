@@ -1,0 +1,230 @@
+#:import utils kivy.utils
+#:import StringProperty kivy.properties.StringProperty
+
+
+# --- PLAYER SLOT COMPONENT ---
+<PlayerSlot@BoxLayout>:
+   # Create a property to pass the title (Player 1 or Player 2)
+    title: "Player"
+    name_label: player_name_lbl
+
+    orientation: 'vertical'
+    size_hint_y: None
+    height: dp(140) # Fixed height prevents collapsing
+
+    # [left, top, right, bottom] padding
+    # This creates equal "buffer" space around the group
+    padding: [dp(10), dp(15), dp(10), dp(15)]
+    # This creates equal spacing between the 3 elements
+    spacing: dp(15)
+
+    canvas.before:
+        Color:
+            rgba: 1, 1, 1, 0.2
+        Line:
+            width: dp(1.5)
+            rounded_rectangle: (self.x, self.y, self.width, self.height, dp(10))
+
+    Label:
+        text: root.title # Uses the property defined above
+        font_size: '16sp'
+        color: utils.get_color_from_hex(app.accent_color)
+        size_hint_y: None
+        height: dp(20)
+
+    Label:
+        id: player_name_lbl
+        text: ""
+        font_size: '18sp'
+        bold: True
+        size_hint_y: None
+        height: dp(30)
+        # Centering properties for your empty string state
+        text_size: self.size
+        halign: 'center'
+        valign: 'middle'
+        color: utils.get_color_from_hex('#FFFFFF') #player name appears in white
+
+    # Smaller Edit Button
+    GoldButton:
+        text: "Edit"
+        size_hint: None, None
+        width: dp(50) # Fixed size for the button
+        font_size: '16sp'
+        height: dp(25)
+        pos_hint: {'center_x': 0.5}
+         # UPDATED: Pass the ID (1 or 2) to the screen
+        on_release: app.root.ids.setup_screen.show_popup(1 if root.title == "Player 1" else 2)
+
+
+<SetupScreen>:
+    BoxLayout:
+        orientation: 'vertical'
+        padding: dp(20)
+        spacing: dp(10)
+
+        # 1. TOP SAFE AREA (Notch padding
+        Widget:
+            size_hint_y: None
+            height: dp(20)
+
+        Label:
+            text: "Setup Match"
+            size_hint_y: None
+            height: dp(80)
+            font_size: '32sp'
+            color: utils.get_color_from_hex(app.accent_color)
+
+        # Main horizontal container
+        BoxLayout:
+            orientation: 'horizontal'
+            size_hint_y: None
+            height: dp(150)
+            spacing: dp(10)
+
+            PlayerSlot:
+                id: p1_slot
+                title: "Player 1"
+
+            Label:
+                text: "vs"
+                size_hint_x: 0.2
+                font_size: '35sp'
+                color: utils.get_color_from_hex(app.accent_color)
+
+            PlayerSlot:
+                id: p2_slot
+                title: "Player 2"
+
+        Label:
+            height: dp(40)
+            size_hint_y: None
+            text: 'Shoots First'
+            color: utils.get_color_from_hex(app.accent_color)
+            font_size: '20sp'
+            pos_hint: {'center_x': 0.5, 'center_y':0.5}
+            padding: 0, 10, 0, 10
+
+
+        #Toggle switch container
+        BoxLayout:
+            orientation: 'horizontal'
+            size_hint_x: None
+            width: dp(150)
+            pos_hint: {'center_x': 0.5}
+            size_hint_y: None
+            height: dp(30)
+
+            CustomToggle:
+                id: player1_breaks
+                text: 'Player 1'
+                group: 'shoots_first'
+                state: 'down'
+                on_press: root.won_break(); root.validate_toggle(self)
+
+            CustomToggle:
+                id: player2_breaks
+                text: 'Player 2'
+                group: 'shoots_first'
+                on_press: root.won_break(); root.validate_toggle(self)
+
+        # ADDED: Small spacer for the gap between Toggles and Start Match
+        Widget:
+            size_hint_y: None
+            height: dp(30)
+
+        # 3. START MATCH Button (Below the player boxes)
+        GoldButton:
+            text: "START MATCH"
+            size_hint: 0.5, None
+            height: dp(60)
+            pos_hint: {'center_x': 0.5}
+
+        Widget: # Pushes everything to the top
+            size_hint_y: 1.0
+
+        GoldButton:
+            text: "Back"
+            size: dp(160), dp(60)
+            size_hint: None, None # CHANGED: Crucial fix!
+            size: dp(160), dp(60) # CHANGED: Set fixed size
+            on_release: app.change_screen('choose_game', 'right')
+
+        # ADDED: This provides the bottom safe area padding
+        Widget:
+            size_hint_y: None
+            height: dp(30) # This is your custom bottom safe area buffer
+
+
+
+# Define the Popup UI
+<PlayerPopup>:
+    size_hint: (0.8, 0.5)
+    title: "Select Player"
+    title_align: 'center'  # Centers "Select Player" text
+    separator_color: utils.get_color_from_hex(app.accent_color)
+    # Pushes the popup higher on the screen
+    pos_hint: {'center_x': 0.5, 'top': 0.9}
+
+
+    BoxLayout:
+        orientation: 'vertical'
+        padding: dp(10)
+        spacing: dp(10)
+
+        # Scrollable list of players
+        ScrollView:
+            size_hint_y: 0.6
+            BoxLayout:
+                id: player_list_grid
+                orientation: 'vertical'
+                size_hint_y: None
+                height: self.minimum_height
+                spacing: dp(10)
+                padding: dp(10)
+
+        # Input area
+        BoxLayout:
+            orientation: 'vertical'
+            size_hint_y: 0.3
+            spacing: dp(15)
+
+            TextInput:
+                id: new_player_input
+                hint_text: "New player name..."
+                size_hint_x: 0.5 # <--- Half the width of the popup
+                #make sure the input field is centered in popup
+                pos_hint: {'center_x': 0.5}
+                multiline: False
+                size_hint_y: None
+                height: dp(40)
+                width: dp(80)
+                focus: True
+
+            GoldButton:
+                text: "Add"
+                size_hint_y: None
+                height: dp(40)
+                width: dp(100)
+                on_release: root.finalize_selection(new_player_input.text)
+
+
+
+<CustomToggle@ToggleButton>
+    size_hint: None, None
+    height: dp(25)
+    width:  dp(75)
+
+    # Remove the default Kivy grey button background
+    background_color: (1,1,1,1) if self.state == 'down' else app.accent_color
+    background_down: ''
+    background_normal: ''
+
+    # 2. The suppressed tap animation
+    opacity: 0.6 if self.state == 'down' else 1.0
+
+    # Text styling (Dark blue text to match the app background)
+    color: utils.get_color_from_hex(app.main_color)
+    bold: True
+    font_size: '14sp'
+
