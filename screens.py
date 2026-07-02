@@ -39,6 +39,7 @@ class PlayerPopup(Popup):
             btn.popup = self  # Give the button a reference to this popup
             grid.add_widget(btn)
 
+
     def finalize_selection(self, name):
         if name:
             if name not in self.master_list:
@@ -49,6 +50,7 @@ class PlayerPopup(Popup):
 
 class SetupScreen(Screen):
     player_list = ListProperty([])
+
     def show_popup(self, slot_id):
         # 1. Identify which label we are targeting
         p1_label = self.ids.p1_slot.name_label
@@ -78,6 +80,18 @@ class SetupScreen(Screen):
         )
         popup.open()
 
+
+    def won_break(self):
+        if self.ids.player1_breaks.state == 'down':
+            print("Player 1 breaks!")
+        elif self.ids.player2_breaks.state == 'down':
+            print("Player 2 breaks!")
+
+    def validate_toggle(self, current_btn):
+        if self.ids.player1_breaks.state == 'normal' and self.ids.player2_breaks.state == 'normal':
+            current_btn.state = 'down'
+
+
     def start_game(self):
         if len(self.selected_players) == 2:
             app = App.get_running_app()
@@ -90,8 +104,6 @@ class SetupScreen(Screen):
         else:
             print("Please select exactly 2 players!")
 
-class GameSetupScreen(Screen):
-    pass
 
 
 class HomeScreen(Screen):
