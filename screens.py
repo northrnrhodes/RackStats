@@ -3,12 +3,13 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.button import Button
 from kivy.uix.label import Label
 from kivy.uix.popup import Popup
-from kivy.properties import StringProperty, ListProperty
+from kivy.properties import StringProperty, ListProperty, BooleanProperty, NumericProperty
+from kivy.clock import Clock
 from kivy.metrics import dp
 from kivy.app import App
 
 
-
+#define logic for select player list
 class PlayerButton(Button):
     player_name = StringProperty("")
 
@@ -17,7 +18,7 @@ class PlayerButton(Button):
         # a simpler way: just define a reference!
         self.popup.finalize_selection(self.player_name)
 
-
+#popup logic for add player
 class PlayerPopup(Popup):
 
     def __init__(self, target_label, player_list, master_list, **kwargs):
@@ -46,6 +47,36 @@ class PlayerPopup(Popup):
                 self.master_list.append(name)
             self.target_label.text = name
         self.dismiss()
+
+
+#clock widget logic
+class ClockWidget(BoxLayout):
+    seconds_passed = NumericProperty(0)
+    timer_text = StringProperty('00:00')
+    is_running = BooleanProperty(False)
+
+    def toggle_timer(self):
+        btn = self.ids.play_pause_btn
+        if self.is_running:
+            #stop the timer
+            Clock.unschedule(self.update_timer)
+            btn.background_normal = 'images/play.png'
+            btn.background_down = 'images/play.png'
+        else:
+            #start the timer
+            Clock.schedule_interval(self.update_timer, 1)
+            btn.background_normal = 'images/pause.png'
+            btn.background_down = 'images/pause.png'
+
+
+        self.is_running = not self.is_running
+
+    def update_timer(self, dt):
+        self.seconds_passed += 1
+        minutes = self.seconds_passed // 60
+        seconds = self.seconds_passed % 60
+        self.timer_text = f'{minutes:02}:{seconds:02}'
+
 
 
 class SetupScreen(Screen):
@@ -82,10 +113,16 @@ class SetupScreen(Screen):
 
 
     def won_break(self):
+        app = App.get_running_app()
+        app.player1, app.current_player = self.player_list[0], self.player_list[0]
+        app.player2 = self.player_list[1]
         if self.ids.player1_breaks.state == 'down':
             print("Player 1 breaks!")
+
         elif self.ids.player2_breaks.state == 'down':
             print("Player 2 breaks!")
+            app.player1, app.current_player = self.player_list[1], self.player_list[1]
+            app.player2 = self.player_list[0]
 
     def validate_toggle(self, current_btn):
         if self.ids.player1_breaks.state == 'normal' and self.ids.player2_breaks.state == 'normal':
@@ -122,7 +159,27 @@ class ChooseGameScreen(Screen):
     pass
 
 class MatchScreen8(Screen):
-    pass
+    #change player and record turn metrics
+    def change_player(self):
+        app = App.get_running_app()
+        if self.ids.safety_toggle.state == 'down':
+            print(f"{app.current_player} played a safety this turn!")
+            self.ids.safety_toggle.state = 'normal'
+            if app.current_player == app.player1:
+                app.player1_defense +=1
+            else:
+                app.player2_defense += 1
+
+
+        #this code has to run last in method!!!
+        if app.current_player == app.player1:
+            app.current_player = app.player2
+        else:
+            app.current_player = app.player1
+
+
+
+
 
 class MatchScreen9(Screen):
     pass

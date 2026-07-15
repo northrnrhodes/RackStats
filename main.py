@@ -16,9 +16,14 @@ class BilliardsScorekeeping(App):
     #global app variables
     game_type = StringProperty('')
     players = ListProperty([])
-    score = NumericProperty(0)
     player1 = StringProperty('')
     player2 = StringProperty('')
+    current_player = StringProperty('')
+    player1_defense = NumericProperty(0)
+    player2_defense = NumericProperty(0)
+    player1_wins = NumericProperty(0)
+    player2_wins = NumericProperty(0)
+    total_innings = NumericProperty(0)
 
     #color themes
     main_color = StringProperty('#102A44') #darkblue
@@ -47,7 +52,7 @@ class BilliardsScorekeeping(App):
         self.game_type = game
         self.change_screen('setup_screen')
         print(self.game_type)
-        print(self.score)
+
 
 
 

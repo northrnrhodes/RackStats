@@ -74,6 +74,12 @@
             height: dp(80)
             font_size: '32sp'
             color: utils.get_color_from_hex(app.accent_color)
+        Label:
+            text: app.game_type
+            size_hint_y: None
+            height: dp(45)
+            font_size: '24sp'
+            color: utils.get_color_from_hex(app.accent_color)
 
         # Main horizontal container
         BoxLayout:
@@ -120,13 +126,13 @@
                 text: 'Player 1'
                 group: 'shoots_first'
                 state: 'down'
-                on_press: root.won_break(); root.validate_toggle(self)
+                on_press: root.validate_toggle(self)
 
             CustomToggle:
                 id: player2_breaks
                 text: 'Player 2'
                 group: 'shoots_first'
-                on_press: root.won_break(); root.validate_toggle(self)
+                on_press: root.validate_toggle(self)
 
         # ADDED: Small spacer for the gap between Toggles and Start Match
         Widget:
@@ -139,6 +145,7 @@
             size_hint: 0.5, None
             height: dp(60)
             pos_hint: {'center_x': 0.5}
+            on_release: app.change_screen('match_screen8'); root.won_break()
 
         Widget: # Pushes everything to the top
             size_hint_y: 1.0
