@@ -145,7 +145,7 @@
             size_hint: 0.5, None
             height: dp(60)
             pos_hint: {'center_x': 0.5}
-            on_release: app.change_screen('match_screen8'); root.won_break()
+            on_release: app.change_screen('match_screen8'); root.won_break(); app.start_timer(); app.match_started = True
 
         Widget: # Pushes everything to the top
             size_hint_y: 1.0
@@ -167,12 +167,11 @@
 # Define the Popup UI
 <PlayerPopup>:
     size_hint: (0.8, 0.5)
-    title: "Select Player"
+    title: "Manage Player"
     title_align: 'center'  # Centers "Select Player" text
     separator_color: utils.get_color_from_hex(app.accent_color)
     # Pushes the popup higher on the screen
     pos_hint: {'center_x': 0.5, 'top': 0.9}
-
 
     BoxLayout:
         orientation: 'vertical'
@@ -209,10 +208,13 @@
                 focus: True
 
             GoldButton:
-                text: "Add"
+                text: "Save/Add"
                 size_hint_y: None
                 height: dp(40)
                 width: dp(100)
+
+                #Explicitly center the button
+                pos_hint: {'center_x': 0.5}
                 on_release: root.finalize_selection(new_player_input.text)
 
 

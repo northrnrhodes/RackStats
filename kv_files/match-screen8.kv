@@ -30,14 +30,16 @@
         size_hint: None, None
         size: '25dp', '25dp'
         pos_hint: {'center_y': 0.5}
-        background_normal: 'images/play.png'
-        background_down: 'images/play.png'
+
+        #2. UI: Automatically toggle the image based on the App state
+        background_normal: 'images/pause.png' if app.is_running else 'images/play.png'
+        background_down: 'images/pause.png' if app.is_running else 'images/play.png'
         background_color: (1, 1, 1, 1)
-        on_release: root.toggle_timer()
+        on_release: app.start_timer() if not app.is_running else app.stop_timer()
 
 
     Label:
-        text: root.timer_text
+        text: app.timer_text
         font_size: '24sp'
         valign: 'middle'
         color: utils.get_color_from_hex(app.accent_color)
@@ -57,6 +59,15 @@
 
 
     canvas.before:
+        Color:
+            rgba: (1, 1, 1, 0.2) if app.current_player == root.player_name else (0, 0, 0, 0)
+        Rectangle:
+            size: self.size
+            pos: self.pos
+
+
+
+        #border styling logic
         Color:
             rgba: utils.get_color_from_hex(app.accent_color)
         Line:
@@ -141,9 +152,10 @@
             padding: (25, 0, 25, 0)
 
             PlayerBox:
-                player_name: app.player1
-                defensive_count: app.player1_defense
-                win_count: app.player1_wins
+                player_name: app.player1.name
+                defensive_count: app.player1.safeties
+                wins_count: app.player1.wins
+
 
             Label:
                 text: "vs"
@@ -152,9 +164,9 @@
                 color: utils.get_color_from_hex(app.accent_color)
 
             PlayerBox:
-                player_name: app.player2
-                defensive_count: app.player2_defense
-                win_count: app.player2_wins
+                player_name: app.player2.name
+                defensive_count: app.player2.safeties
+                wins_count: app.player2.wins
 
 
 
@@ -175,7 +187,7 @@
             size_hint_y: .1
             pos_hint: {'center_x': 0.5}
             Label:
-                text: f'Total Innings: {str(app.total_innings)}'
+                text: f'Total Innings: {str(app.innings)}'
                 font_size: '20sp'
 
         Widget:
@@ -201,6 +213,15 @@
                 text: 'Game Over'
                 size_hint: (.5, .05)
                 font_size: '20sp'
+                on_release: root.show_popup()
+
+
+            GoldButton:
+                text: 'Previous turn'
+                size_hint: (.5, .05)
+                font_size: '20sp'
+                disabled: app.rack_turn_count == 0
+                on_release: root.previous_player()
 
 
 
@@ -241,3 +262,73 @@
         Line:
             width: dp(1.0)
             rounded_rectangle: (self.x, self.y, self.width, self.height, dp(15))
+
+
+
+# Define the game end Popup UI
+<GameEndPopup>:
+    size_hint: (0.8, 0.5)
+    title: "What happened?"
+    title_align: 'center'  # Centers "What happened" text
+    separator_color: utils.get_color_from_hex(app.accent_color)
+    # Pushes the popup higher on the screen
+    pos_hint: {'center_x': 0.5, 'top': 0.9}
+
+    BoxLayout:
+        orientation: 'vertical'
+        padding: dp(10)
+        spacing: dp(10)
+
+        SafetyToggle:
+            group: 'game_over'
+            id: made_8ball
+            text: 'Made 8 Ball'
+            size_hint: (.5, .05)
+            font_size: '15sp'
+
+
+        SafetyToggle:
+            group: 'game_over'
+            id: wrong_pocket
+            text: '8 Ball wrong pocket'
+            size_hint: (.5, .05)
+            font_size: '15sp'
+
+
+        SafetyToggle:
+            group: 'game_over'
+            id: scratched
+            text: 'Scratched on 8 Ball'
+            size_hint: (.5, .05)
+            font_size: '15sp'
+
+        # New error label
+        Label:
+            id: error_label
+            text: ""
+            color: 1, 0, 0, 1 # Red text
+            font_size: '14sp'
+            size_hint_y: None
+            height: dp(30)
+
+
+        GoldButton:
+            text: 'Submit'
+            size_hint: (.5, .05)
+            font_size: '15sp'
+            on_release: root.get_game_results()
+
+        Widget:
+            size_hint_y: 0.1
+
+        GoldButton:
+            text: 'Back'
+            size_hint: (.5, .05)
+            font_size: '15sp'
+            on_release: root.close_popup()
+
+
+
+
+
+
