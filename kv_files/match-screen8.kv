@@ -139,7 +139,7 @@
         # 1. TOP SAFE AREA (Notch padding)
         Widget:
             size_hint_y: None
-            height: dp(25)
+            height: dp(60)
 
 
         #custom navbar at the top
@@ -415,7 +415,8 @@
     Button:
         text: '< Menu'
         font_size: '18sp'
-        size_hint_x: 0.2
+        size_hint_x: None
+        width: dp(80)
         background_color: 0, 0, 0, 0
         color: utils.get_color_from_hex(app.accent_color)
         on_release: app.menu_button()
@@ -434,7 +435,7 @@
         text: root.match_time
         color: utils.get_color_from_hex(app.accent_color)
         size_hint_x: None
-        text_size: self.size
+        width: self.texture_size[0]  # Dynamically sizes width to fit text perfectly on one line
         font_size: '18sp'
         halign: 'right'
         valign: 'middle'
