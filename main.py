@@ -2,6 +2,7 @@ from kivy.app import App
 from kivy.lang import Builder
 from kivy.clock import Clock
 from screens import *
+from screens import ExitGamePopup
 from kivy.core.window import Window
 from kivy.properties import ListProperty, StringProperty, NumericProperty, BooleanProperty, ObjectProperty, DictProperty
 from data import *
@@ -24,7 +25,7 @@ class BilliardsScorekeeping(App):
     players = ListProperty([])
     player1 = ObjectProperty(Player())
     player2 = ObjectProperty(Player())
-    current_player = StringProperty()
+    current_player = ObjectProperty(None, allownone=True)
     turns = NumericProperty(0)
     rack_turn_count = NumericProperty(0)
     innings = NumericProperty(0)
@@ -32,8 +33,10 @@ class BilliardsScorekeeping(App):
 
 
     #game_clock variables
+    match_seconds = NumericProperty(0)
     seconds_passed = NumericProperty(0)
     timer_text = StringProperty('00:00')
+    match_time = StringProperty('00:00')
     is_running = BooleanProperty(False)
 
    #list containing dictionaries with player_object/turn_times key:value pairs
@@ -52,13 +55,21 @@ class BilliardsScorekeeping(App):
         self.root.ids['screen_manager'].transition.duration = 1.0
         self.root.ids['screen_manager'].current = 'home_screen'
 
+    #builds the UI and loads user data
     def build(self):
         GUI = Builder.load_file('main.kv')
         loaded_data = SaveData.load(self.user_data_dir)
-
         # 2. Safely update the property
         if isinstance(loaded_data, dict):
             self.game_data.update(loaded_data)
+
+        # --- 2. LOAD SAVED PLAYERS INTO SETUP SCREEN ---
+        # Find the setup screen via screen manager and populate its player_list
+        setup_screen = GUI.ids.screen_manager.get_screen('setup_screen')
+        loaded_players = SaveData.load_players(self.user_data_dir, Player)
+        if loaded_players:
+            setup_screen.player_list = loaded_players
+
         return GUI
 
     def change_screen(self, screen_name, direction='left'):
@@ -68,6 +79,8 @@ class BilliardsScorekeeping(App):
         screen_manager.current = screen_name
         # screen = self.root.ids.game_setup_screen
 
+
+    #retrieves game type and passes it to setup screen
     def get_game_type(self, game):
         self.game_type = game
         self.change_screen('setup_screen')
@@ -81,6 +94,7 @@ class BilliardsScorekeeping(App):
             self.is_running = True
             self.timer_event = Clock.schedule_interval(self.update_timer, 1)
 
+
     def stop_timer(self):
         if self.is_running:
             self.is_running = False
@@ -88,15 +102,53 @@ class BilliardsScorekeeping(App):
 
 
     def update_timer(self, dt):
-
         self.seconds_passed += 1
         minutes = self.seconds_passed // 60
         seconds = self.seconds_passed % 60
         self.timer_text = f'{minutes:02}:{seconds:02}'
 
+        if self.match_started == True:
+            self.match_seconds += 1
+            mm, ss = divmod(self.match_seconds, 60)
+            self.match_time = f"{mm:02}:{ss:02}"
+
+    def menu_button(self):
+        popup = ExitGamePopup()
+        popup.open()
+
+
+    def reset_game_state(self):
+        # Reset match timing and state flags
+        if self.is_running:
+            self.stop_timer()
+        self.match_seconds = 0
+        self.match_time = '00:00'
+        self.match_started = False
+        self.is_running = False
+        self.seconds_passed = 0
+        self.timer_text = '00:00'
+        self.rack_turn_count = 0
+
+        # Reset turn data and innings
+        self.turn_data = []
+        self.innings = 0
+
+        # Reset player stats if they exist
+        self.current_player = None
+        if self.player1:
+            self.player1.wins = 0
+            self.player1.safeties = 0
+        if self.player2:
+            self.player2.wins = 0
+            self.player2.safeties = 0
+
+
+
+
+
     def record_turn_time(self):
         # --- ADDED: Method to save and reset timer ---
-        self.turn_data.append({'player': self.current_player, 'turn_time': self.seconds_passed})
+        self.turn_data.append({'player': self.current_player.name, 'turn_time': self.seconds_passed})
         self.seconds_passed = 0
         self.timer_text = '00:00'
 

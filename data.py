@@ -7,6 +7,7 @@ from kivy.app import App
 
 
 
+
 class Player(EventDispatcher):
     name = StringProperty("")
     user_id = StringProperty(None)
@@ -37,6 +38,16 @@ class SaveData():
 
         return os.path.join(documents_dir, 'match_history.json')
 
+    def get_player_path(user_data_dir):
+        if 'Library' in user_data_dir:
+            documents_dir = os.path.join(user_data_dir.split('Library')[0], 'Documents')
+
+        else:
+            documents_dir = user_data_dir
+
+        return os.path.join(documents_dir, 'player_list.json')
+
+
     @classmethod
     def save(cls, data, user_data_dir):
         try:
@@ -65,3 +76,44 @@ class SaveData():
                 return {}
 
         return {}
+
+
+    @classmethod
+    def save_players(cls, players, user_data_dir):
+        try:
+            path = cls.get_player_path(user_data_dir)
+            os.makedirs(os.path.dirname(path), exist_ok=True)
+
+            player_data = [
+                {'name' : p.name, 'user_id': p.user_id}
+                for p in players if hasattr(p, 'name')
+            ]
+
+            with open(path, 'w') as f:
+                json.dump(player_data, f, indent=4)
+
+        except Exception as e:
+            print(f'Failed to save players: {e}')
+
+    @classmethod
+    def load_players(cls, user_data_dir, player_class):
+        path = cls.get_player_path(user_data_dir)
+        if os.path.exists(path):
+            try:
+                with open(path, 'r') as f:
+                    player_data = json.load(f)
+                    if isinstance(player_data, list):
+                        loaded_players = []
+                        for item in player_data:
+                            p = player_class(
+                                name=item.get("name", ""),
+                                user_id=item.get("user_id", "")
+                            )
+                            loaded_players.append(p)
+                        return loaded_players
+            except Exception:
+                return []
+
+        return []
+
+

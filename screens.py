@@ -3,62 +3,65 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.button import Button
 from kivy.uix.label import Label
 from kivy.uix.popup import Popup
-from kivy.properties import StringProperty, ListProperty, BooleanProperty, NumericProperty
+from kivy.properties import StringProperty, ListProperty, BooleanProperty, NumericProperty, ObjectProperty
 from kivy.clock import Clock
 from kivy.metrics import dp
 from kivy.app import App
 from datetime import datetime
+from data import *
+import uuid
 
 
 
 
 #define logic for select player list
 class PlayerButton(Button):
-    player_name = StringProperty("")
+    player_obj = ObjectProperty(None)
 
     def on_release(self):
         # We call the method on the parent popup (which is 'root')
         # a simpler way: just define a reference!
-        self.popup.finalize_selection(self.player_name)
+        self.popup.finalize_selection(self.player_obj)
 
 #popup logic for add player
 class PlayerPopup(Popup):
-    def __init__(self, target_label, player_list, master_list, **kwargs):
-        self.target_label = target_label
+    def __init__(self, slot_id, player_list, master_list, **kwargs):
+        self.slot_id = slot_id
         self.player_list = player_list
         self.master_list = master_list
         super().__init__(**kwargs)
-        # --- CHANGED: Pre-fill input if a name exists (for editing) ---
-        if target_label.text != "Select Player":
-            self.ids.new_player_input.text = target_label.text
 
         grid = self.ids.player_list_grid
-        for name in player_list:
+        for p in player_list:
             # Create our custom button
-            btn = PlayerButton(text=name, size_hint=(None, None), width=dp(200), height= dp(40))
+            btn = PlayerButton(text=p.name, player_obj =p, size_hint=(None, None), width=dp(200), height= dp(40))
             btn.pos_hint = {'center_x': 0.5}
-            btn.player_name = name
+            # btn.player_obj = player
             btn.popup = self  # Give the button a reference to this popup
             grid.add_widget(btn)
 
 
 
-    def finalize_selection(self, new_name):
+    def finalize_selection(self, selected_player_obj):
+        app = App.get_running_app()
+        # player_to_use = None
         # --- CHANGED: Unified logic for both selecting and editing ---
-        new_name = new_name.strip()
-        old_name = self.target_label.text.strip()
+        typed_name = self.ids.new_player_input.text.strip()
+        target_slot = app.player1 if self.slot_id == 1 else app.player2
 
-        if new_name:
-            if old_name in self.master_list:
-                idx = self.master_list.index(old_name)
-                self.master_list[idx] = new_name
-            elif new_name not in self.master_list:
-                self.master_list.append(new_name)
+        if typed_name:
+            target_slot.name = typed_name
+            target_slot.user_id = str(uuid.uuid4())[:8]
 
-                # 2. Update the label and dismiss
-            self.target_label.text = new_name
-            self.dismiss()
+            # Add to master list if not already there
+            if not any(p.name == typed_name for p in self.master_list):
+                self.master_list.append(target_slot)
+        elif selected_player_obj:
+            # User clicked an existing player: copy their identity over
+            target_slot.name = selected_player_obj.name
+            target_slot.user_id = selected_player_obj.user_id
 
+        self.dismiss()
 
 
 #game end popup logic
@@ -72,51 +75,48 @@ class GameEndPopup(Popup):
 
     def made_8ball(self):
         app = App.get_running_app()
-        self.game_end_event = f"{app.current_player} made 8ball"
+        self.game_end_event = f"{app.current_player.name} made 8ball"
         self.game_winner = app.current_player
-        if self.player1.name == app.current_player:
+        if self.player1 == app.current_player:
             self.player1.add_win()
         else:
             self.player2.add_win()
+        print(self.game_end_event)
 
     def made_8ball_wrong_pocket(self):
         app = App.get_running_app()
-        self.game_end_event = f"{app.current_player} made 8ball wrong pocket"
-        if self.player1.name == app.current_player:
+        self.game_end_event = f"{app.current_player.name} made 8ball wrong pocket"
+        if self.player1 == app.current_player:
             self.player2.add_win()
-            self.game_winner = app.player2.name
+            self.game_winner = app.player2
         else:
-            self.game_winner = app.player1.name
+            self.game_winner = app.player1
             self.player1.add_win()
 
         app.record_turn_time()
         app.turns += 1
         app.innings = app.turns // 2
         # this code has to run last in method!!!
-        if app.current_player == app.player1.name:
-            app.current_player = app.player2.name
-        else:
-            app.current_player = app.player1.name
+
+        app.current_player = self.player2 if app.current_player == self.player1 else self.player1
 
     def scratched_on_8ball(self):
         app = App.get_running_app()
-        self.game_end_event = f"{app.current_player} scratched on 8ball"
-        if self.player1.name == app.current_player:
+        self.game_end_event = f"{app.current_player.name} scratched on 8ball"
+        if self.player1 == app.current_player:
             self.player2.add_win()
-            self.game_winner = app.player2.name
+            self.game_winner = app.player2
 
         else:
             self.player1.add_win()
-            app.current_player = app.player1.name
+            app.current_player = app.player2
+            self.game_winner = app.player1
 
         app.record_turn_time()
         app.turns += 1
         app.innings = app.turns // 2
         # this code has to run last in method!!!
-        if app.current_player == app.player1.name:
-            app.current_player = app.player2.name
-        else:
-            app.current_player = app.player1.name
+        app.current_player = self.player2 if app.current_player == self.player1 else self.player1
 
     def get_game_results(self):
         buttons = [self.ids.made_8ball, self.ids.wrong_pocket, self.ids.scratched]
@@ -149,11 +149,18 @@ class GameEndPopup(Popup):
 
         match_entry = {
                  "timestamp": current_time,
+                "game_type": app.game_type,
                 "game": app.match_count,
-                "player1" : app.player1.name,
-                "player2" : app.player2.name,
+                "player1" : {
+                    'name': app.player1.name,
+                    'user_id': app.player1.user_id
+                },
+                "player2" : {
+                    'name': app.player2.name,
+                    'user_id': app.player2.user_id,
+                },
                 "total_innings": len(app.turn_data)// 2,
-                "match_winner": self.game_winner,
+                "match_winner": self.game_winner.name,
                 "game_end_event": self.game_end_event,
                 "turns": list(app.turn_data)
                 }
@@ -185,14 +192,18 @@ class GameEndPopup(Popup):
             self.ids.error_label.text = "Match saved failed!"
             self.ids.error_label.color = (1, 0, 0, 1)  # Red
 
-
-
-
-
-
     def close_popup(self, dt=None):
         self.dismiss()
 
+class ExitGamePopup(Popup):
+    def close(self):
+        self.dismiss()
+
+    def quit_game(self):
+        app = App.get_running_app()
+        app.reset_game_state()
+        self.close()
+        app.change_screen('home_screen', 'right')
 
 
 #clock widget logic
@@ -208,49 +219,56 @@ class ClockWidget(BoxLayout):
 class SetupScreen(Screen):
     player_list = ListProperty([])
 
+
     def show_popup(self, slot_id):
-        # 1. Identify which label we are targeting
-        p1_label = self.ids.p1_slot.name_label
-        p2_label = self.ids.p2_slot.name_label
+        app = App.get_running_app()
 
-        if slot_id == 1:
-            target = p1_label
-            other = p2_label
-        else:
-            target = p2_label
-            other = p1_label
+        # --- CHANGED: Check name strings on app.player1 and app.player2 directly instead of UI labels ---
+        other_name = app.player2.name if slot_id == 1 else app.player1.name
 
-        # 2. Get the name of the player currently in the other slot
-        other_name = other.text.strip()
+        filtered_list = [p for p in self.player_list if p.name != other_name]
 
-        # 3. Create a filtered list
-        filtered_list = []
-        for name in self.player_list:
-            if name != other_name:
-                filtered_list.append(name)
 
         # 4. Open the popup
         popup = PlayerPopup(
-            target_label=target,
+            slot_id=slot_id,
             player_list=filtered_list,
             master_list=self.player_list,
         )
         popup.open()
 
-
-    def won_break(self):
+    def start_match(self):
         app = App.get_running_app()
-        app.player1.name, app.current_player = self.player_list[0], self.player_list[0]
-        app.player2.name = self.player_list[1]
 
+        # Check if the player name labels inside the slots are empty
+        p1_name = self.ids.p1_slot.name_label.text.strip()
+        p2_name = self.ids.p2_slot.name_label.text.strip()
+
+        if not p1_name or not p2_name:
+            self.ids.setup_error_label.text = "Please add players to start match!"
+            return
+
+        self.ids.setup_error_label.text = ""
+        self.won_break(app)
+
+        # Save players right before starting the match
+        SaveData.save_players(self.player_list, app.user_data_dir)
+        app.players = self.player_list
+        # Then change to your match screen
+        app.change_screen('match_screen8')
+        app.start_timer()
+        app.match_started = True
+
+
+    def won_break(self, app):
         if self.ids.player1_breaks.state == 'down':
+            app.current_player = app.player1
             print(f"{app.player1.name} breaks!")
 
 
         elif self.ids.player2_breaks.state == 'down':
-            print(f"{app.player2.name} breaks!")
-            app.player1.name, app.current_player = self.player_list[1], self.player_list[1]
-            app.player2.name = self.player_list[0]
+            app.current_player = app.player2
+            print(f"{app.player1.name} breaks!")
 
 
     def validate_toggle(self, current_btn):
@@ -275,6 +293,8 @@ class ChooseGameScreen(Screen):
 
 class MatchScreen8(Screen):
 
+
+
     def show_popup(self):
         app = App.get_running_app()
         popup = GameEndPopup(
@@ -294,20 +314,15 @@ class MatchScreen8(Screen):
         app.rack_turn_count += 1
         app.innings = app.turns // 2
         if self.ids.safety_toggle.state == 'down':
-            print(f"{app.current_player} played a safety this turn!")
+            print(f"{app.current_player.name} played a safety this turn!")
             self.ids.safety_toggle.state = 'normal'
-            if app.current_player == app.player1.name:
+            if app.current_player == app.player1:
                 app.player1.play_safety()
             else:
                 app.player2.play_safety()
 
-
-
-        #this code has to run last in method!!!
-        if app.current_player == app.player1.name:
-            app.current_player = app.player2.name
-        else:
-            app.current_player = app.player1.name
+        # --- CHANGED: Switch current_player object reference directly ---
+        app.current_player = app.player2 if app.current_player == app.player1 else app.player1
 
     def previous_player(self):
         app = App.get_running_app()
@@ -327,14 +342,8 @@ class MatchScreen8(Screen):
         if not app.is_running:
             app.start_timer()
 
-        #change current player back to other player
-        if app.current_player == app.player1.name:
-            app.current_player = app.player2.name
-        else:
-            app.current_player = app.player1.name
-
-
-
+        # --- CHANGED: Revert current_player object reference directly ---
+        app.current_player = app.player2 if app.current_player == app.player1 else app.player1
 
 
 

@@ -34,7 +34,7 @@
 
     Label:
         id: player_name_lbl
-        text: ""
+        text: (app.player1.name if root.title == "Player 1" else app.player2.name) if (app.player1.name if root.title == "Player 1" else app.player2.name) else ""
         font_size: '18sp'
         bold: True
         size_hint_y: None
@@ -139,13 +139,24 @@
             size_hint_y: None
             height: dp(30)
 
+        # --- Error Label (Blank by default) ---
+        Label:
+            id: setup_error_label
+            text: ""
+            color: (1, 0, 0, 1)  # Red text for errors
+            size_hint_y: None
+            height: dp(30)
+            font_size: '14sp'
+            halign: 'center'
+            valign: 'middle'
+
         # 3. START MATCH Button (Below the player boxes)
         GoldButton:
             text: "START MATCH"
             size_hint: 0.5, None
             height: dp(60)
             pos_hint: {'center_x': 0.5}
-            on_release: app.change_screen('match_screen8'); root.won_break(); app.start_timer(); app.match_started = True
+            on_release: root.start_match()
 
         Widget: # Pushes everything to the top
             size_hint_y: 1.0

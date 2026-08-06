@@ -51,6 +51,7 @@
 <PlayerBox@BoxLayout>:
    # Create a property to pass the title (Player 1 or Player 2)
     player_name: ''
+    is_active: False
     defensive_count: 0
     wins_count: 0
     orientation: 'vertical'
@@ -60,7 +61,7 @@
 
     canvas.before:
         Color:
-            rgba: (1, 1, 1, 0.2) if app.current_player == root.player_name else (0, 0, 0, 0)
+            rgba: (1, 1, 1, 0.2) if root.is_active else (0, 0, 0, 0)
         Rectangle:
             size: self.size
             pos: self.pos
@@ -138,7 +139,36 @@
         # 1. TOP SAFE AREA (Notch padding)
         Widget:
             size_hint_y: None
-            height: dp(60)
+            height: dp(25)
+
+
+        #custom navbar at the top
+        NavBar:
+
+
+        #BoxLayout:
+            #orientation: 'vertical'
+            #size_hint_y: None
+            #padding: 20, 0, 20, 0
+
+            #GoldButton:
+                #text: 'Main Menu'
+                #size_hint: (0.5, 0.5)
+                #on_release: app.change_screen('home_screen')
+
+
+
+                 # --- Custom Separator Line below the header ---
+            #Widget:
+                #size_hint_y: None
+                #height: dp(2)
+                #canvas:
+                    #Color:
+                        #rgba: utils.get_color_from_hex(app.accent_color)
+                    #Rectangle:
+                        #pos: self.pos
+                        #size: self.size
+
 
 
 
@@ -152,9 +182,10 @@
             padding: (25, 0, 25, 0)
 
             PlayerBox:
-                player_name: app.player1.name
+                player_name: app.player1.name if app.player1 else "Player 1"
                 defensive_count: app.player1.safeties
                 wins_count: app.player1.wins
+                is_active: app.current_player == app.player1
 
 
             Label:
@@ -164,9 +195,10 @@
                 color: utils.get_color_from_hex(app.accent_color)
 
             PlayerBox:
-                player_name: app.player2.name
+                player_name: app.player2.name if app.player2 else "Player 2"
                 defensive_count: app.player2.safeties
                 wins_count: app.player2.wins
+                is_active: app.current_player == app.player2
 
 
 
@@ -198,7 +230,7 @@
             spacing: dp(20)
 
             GoldButton:
-                text: f"{app.current_player} 's turn over"
+                text: f"{app.current_player.name if app.current_player and app.current_player.name else 'Player'} 's turn over"
                 font_size: '20sp'
                 size_hint: (.5, .05)
                 on_release: root.change_player()
@@ -268,16 +300,60 @@
 # Define the game end Popup UI
 <GameEndPopup>:
     size_hint: (0.8, 0.5)
-    title: "What happened?"
-    title_align: 'center'  # Centers "What happened" text
-    separator_color: utils.get_color_from_hex(app.accent_color)
+    title: ""
+
+    separator_height: 0  # Hide Kivy's default top separator line
     # Pushes the popup higher on the screen
     pos_hint: {'center_x': 0.5, 'top': 0.9}
+    auto_dismiss: False
 
     BoxLayout:
         orientation: 'vertical'
-        padding: dp(10)
-        spacing: dp(10)
+        padding: dp(20)
+        spacing: dp(15)
+
+        #custom title label with "X" button
+        BoxLayout:
+            size_hint_y: None
+            height: dp(30)
+
+            Label:
+                text: "What happened?"
+                font_size: '18sp'
+                bold: True
+                halign: 'center'
+                valign: 'middle'
+
+            Button:
+                text: "X"
+                size_hint: (None, None)
+                size: dp(30), dp(30)
+                font_size: '14sp'
+                background_normal: ''
+                background_color: (0.8, 0.2, 0.2, 1)
+                on_release: root.dismiss()
+
+        # --- Custom Separator Line below the header ---
+        Widget:
+            size_hint_y: None
+            height: dp(2)
+            canvas:
+                Color:
+                    rgba: utils.get_color_from_hex(app.accent_color)
+                Rectangle:
+                    pos: self.pos
+                    size: self.size
+
+
+         # New error label
+        Label:
+            id: error_label
+            text: ""
+            color: 1, 0, 0, 1 # Red text
+            font_size: '14sp'
+            size_hint_y: None
+            height: dp(30)
+
 
         SafetyToggle:
             group: 'game_over'
@@ -302,14 +378,10 @@
             size_hint: (.5, .05)
             font_size: '15sp'
 
-        # New error label
-        Label:
-            id: error_label
-            text: ""
-            color: 1, 0, 0, 1 # Red text
-            font_size: '14sp'
-            size_hint_y: None
-            height: dp(30)
+
+        Widget:
+            size_hint_y: 0.1
+
 
 
         GoldButton:
@@ -318,17 +390,80 @@
             font_size: '15sp'
             on_release: root.get_game_results()
 
-        Widget:
-            size_hint_y: 0.1
+
+
+
+<NavBar@BoxLayout>
+    id: nav_bar
+    game_type: app.game_type
+    match_time: app.match_time
+    padding: [dp(15), dp(0), dp(15), dp(0)]
+    spacing: dp(10)
+
+
+    orientation: 'horizontal'
+    size_hint_y: None
+    height: dp(45)
+    #bottom seperator line
+    canvas.before:
+        Color:
+            rgba: utils.get_color_from_hex(app.accent_color)
+        Rectangle:
+            pos: self.x, self.y
+            #set width to take up entire screen and thickness of line to dp(2)
+            size: self.width, dp(2)
+    Button:
+        text: '< Menu'
+        font_size: '18sp'
+        size_hint_x: 0.2
+        background_color: 0, 0, 0, 0
+        color: utils.get_color_from_hex(app.accent_color)
+        on_release: app.menu_button()
+
+    Label:
+        text: root.game_type
+        color: utils.get_color_from_hex(app.accent_color)
+        size_hint_x: 1
+        font_size: '18sp'
+        bold: True
+        text_size: self.size
+        halign: 'center'
+        valign: 'middle'
+
+    Label:
+        text: root.match_time
+        color: utils.get_color_from_hex(app.accent_color)
+        size_hint_x: None
+        text_size: self.size
+        font_size: '18sp'
+        halign: 'right'
+        valign: 'middle'
+
+
+#main menu quit game popup
+
+<ExitGamePopup>
+    size_hint: (0.5, 0.2)
+    title: "Are you sure you want to exit? All current progress will be lost."
+
+    separator_height: 0  # Hide Kivy's default top separator line
+    # Pushes the popup higher on the screen
+    pos_hint: {'center_x': 0.5, 'top': 0.9}
+    auto_dismiss: False
+    BoxLayout:
+        orientation: 'horizontal'
+        padding: 10, 0, 10, 0
+        spacing: dp(10)
 
         GoldButton:
-            text: 'Back'
-            size_hint: (.5, .05)
-            font_size: '15sp'
-            on_release: root.close_popup()
+            text: 'Yes'
+            size_hint: .2, .2
+
+            on_release: root.quit_game()
 
 
-
-
-
+        GoldButton:
+            text: 'No'
+            size_hint: .2, .2
+            on_release: root.close()
 
