@@ -1,0 +1,15 @@
+# Python / Virtual Environment
+.venv/
+__pycache__/
+*.pyc
+image_script.py
+
+# macOS / Xcode
+.DS_Store
+build/
+DerivedData/
+*.pbxuser
+*.mode1v3
+*.mode2v3
+*.perspectivev3
+xcuserdata/

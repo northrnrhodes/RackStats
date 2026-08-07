@@ -6,6 +6,8 @@ from screens import ExitGamePopup
 from kivy.core.window import Window
 from kivy.properties import ListProperty, StringProperty, NumericProperty, BooleanProperty, ObjectProperty, DictProperty
 from data import *
+from kivy.uix.behaviors import ButtonBehavior
+from kivy.uix.image import Image
 
 
 #comment out this code before building in xcode
@@ -14,22 +16,32 @@ Window.size = (430, 932)
 # smooths out screen transition
 Window.clearcolor = (16/255, 42/255, 68/255, 1)
 
+
+class ImageButton(ButtonBehavior, Image):
+    pass
+
 class BilliardsScorekeeping(App):
     #global app variables
     game_type = StringProperty('')
-    match_started = BooleanProperty(False)
+
     match_ended = BooleanProperty(False)
     save_data = ObjectProperty(SaveData())
+    match_id = StringProperty('')
+    match_in_progress = BooleanProperty(False)
+    active_match_data = DictProperty({})
+    total_rack_seconds = NumericProperty(0)
 
     #player and game variables
     players = ListProperty([])
     player1 = ObjectProperty(Player())
     player2 = ObjectProperty(Player())
     current_player = ObjectProperty(None, allownone=True)
+
     turns = NumericProperty(0)
     rack_turn_count = NumericProperty(0)
     innings = NumericProperty(0)
     match_count = NumericProperty(1)
+    played_safe = BooleanProperty(False)
 
 
     #game_clock variables
@@ -59,11 +71,29 @@ class BilliardsScorekeeping(App):
     def build(self):
         GUI = Builder.load_file('main.kv')
         loaded_data = SaveData.load(self.user_data_dir)
+
         # 2. Safely update the property
         if isinstance(loaded_data, dict):
             self.game_data.update(loaded_data)
+        print(self.game_data)
 
-        # --- 2. LOAD SAVED PLAYERS INTO SETUP SCREEN ---
+        # <--- Check match history for any unsubmitted/unfinished match after a crash or exit --->
+        unfinished_match = SaveData.get_unfinished_match(self.user_data_dir)
+
+        if unfinished_match:
+            self.match_in_progress = True
+            self.match_id = unfinished_match.get("match_id", "")
+            self.active_match_data = unfinished_match
+            self.game_type = unfinished_match.get("game_type", "")
+            print(f"Unfinished match detected! Recovering match ID: {self.match_id}")
+
+        # TODO: Add your logic here to unpack `unfinished_match` back into your
+        # TODO RAM variables (e.g., racks, innings, players, timers) if you want them restored.
+        else:
+            self.match_in_progress = False
+            print("No unfinished matches found. Starting fresh.")
+
+        # --- LOAD SAVED PLAYERS INTO SETUP SCREEN ---
         # Find the setup screen via screen manager and populate its player_list
         setup_screen = GUI.ids.screen_manager.get_screen('setup_screen')
         loaded_players = SaveData.load_players(self.user_data_dir, Player)
@@ -112,9 +142,19 @@ class BilliardsScorekeeping(App):
             mm, ss = divmod(self.match_seconds, 60)
             self.match_time = f"{mm:02}:{ss:02}"
 
+
+
     def menu_button(self):
         popup = ExitGamePopup()
         popup.open()
+
+    def get_game_state(self):
+        if self.match_started == True:
+            print("There was a current game in progress. Would you like to continue?")
+        else:
+            self.match_started = False
+            self.change_screen('setup_screen')
+
 
 
     def reset_game_state(self):
@@ -128,6 +168,8 @@ class BilliardsScorekeeping(App):
         self.seconds_passed = 0
         self.timer_text = '00:00'
         self.rack_turn_count = 0
+        self.match_id = ''
+        self.turns = 0
 
         # Reset turn data and innings
         self.turn_data = []
@@ -144,18 +186,17 @@ class BilliardsScorekeeping(App):
 
 
 
-
-
     def record_turn_time(self):
         # --- ADDED: Method to save and reset timer ---
-        self.turn_data.append({'player': self.current_player.name, 'turn_time': self.seconds_passed})
+        self.turn_data.append({'player': self.current_player.name, 'turn_time': self.seconds_passed, 'played_safe': self.played_safe})
+        if self.played_safe:
+            self.played_safe = False
         self.seconds_passed = 0
         self.timer_text = '00:00'
 
         print(f'Match has started: {self.match_started}')
         for turn in self.turn_data:
             print(turn)
-
 
 
 

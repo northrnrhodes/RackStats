@@ -143,14 +143,27 @@ class GameEndPopup(Popup):
         print(current_date)
         print(current_time)
 
-        if current_date not in app.game_data:
-            app.game_data[current_date] = []
+        if current_date not in app.game_data or not isinstance(app.game_data[current_date], dict):
+            app.game_data[current_date] = {}
 
-
-        match_entry = {
-                 "timestamp": current_time,
+        # <--- Initialize the match container using match_id if it doesn't exist yet --->
+        if app.match_id not in app.game_data[current_date]:
+            app.game_data[current_date][app.match_id] = {
+                "match_id": app.match_id,
+                "match_ended": False,  # Will flip to True when finished/submitted
                 "game_type": app.game_type,
+                "games": []
+            }
+
+        # 1. Calculate rack time first using your turn data
+        total_rack_seconds = sum(turn.get('turn_time', 0) for turn in app.turn_data)
+        minutes, seconds = divmod(total_rack_seconds, 60)
+        formatted_rack_time = f"{minutes:02}:{seconds:02}"
+
+        game_entry = {
+                 "timestamp": current_time,
                 "game": app.match_count,
+                'rack_time': formatted_rack_time,
                 "player1" : {
                     'name': app.player1.name,
                     'user_id': app.player1.user_id
@@ -167,7 +180,10 @@ class GameEndPopup(Popup):
 
 
         # 4. Append to the specific list for today
-        app.game_data[current_date].append(match_entry)
+        app.game_data[current_date][app.match_id]['games'].append(game_entry)
+
+        # Set to True if this submission completes your match, or keep False if multi-game continues.
+        app.game_data[current_date][app.match_id]["match_ended"] = True
 
 
         #save match data to game_data dictionary on disk
@@ -239,6 +255,7 @@ class SetupScreen(Screen):
 
     def start_match(self):
         app = App.get_running_app()
+        app.match_id = str(uuid.uuid4())[:8]
 
         # Check if the player name labels inside the slots are empty
         p1_name = self.ids.p1_slot.name_label.text.strip()
@@ -292,9 +309,6 @@ class ChooseGameScreen(Screen):
     pass
 
 class MatchScreen8(Screen):
-
-
-
     def show_popup(self):
         app = App.get_running_app()
         popup = GameEndPopup(
@@ -309,20 +323,23 @@ class MatchScreen8(Screen):
     #change player and record turn metrics
     def change_player(self):
         app = App.get_running_app()
-        app.record_turn_time()
-        app.turns += 1
-        app.rack_turn_count += 1
-        app.innings = app.turns // 2
         if self.ids.safety_toggle.state == 'down':
             print(f"{app.current_player.name} played a safety this turn!")
             self.ids.safety_toggle.state = 'normal'
             if app.current_player == app.player1:
                 app.player1.play_safety()
+                app.played_safe = True
             else:
                 app.player2.play_safety()
-
+                app.played_safe = True
+        app.record_turn_time()
+        app.turns += 1
+        app.rack_turn_count += 1
+        app.innings = app.turns // 2
         # --- CHANGED: Switch current_player object reference directly ---
         app.current_player = app.player2 if app.current_player == app.player1 else app.player1
+        if app.played_safe == True:
+            app.played_safe = False
 
     def previous_player(self):
         app = App.get_running_app()
@@ -335,8 +352,6 @@ class MatchScreen8(Screen):
         minutes = app.seconds_passed // 60
         seconds = app.seconds_passed % 60
         app.timer_text = f'{minutes:02}:{seconds:02}'
-        app.turn_data.pop()
-
         # 4. Ensure the timer is running
         # If the user hit 'End Turn' (which stops it), we resume it here
         if not app.is_running:
@@ -344,6 +359,9 @@ class MatchScreen8(Screen):
 
         # --- CHANGED: Revert current_player object reference directly ---
         app.current_player = app.player2 if app.current_player == app.player1 else app.player1
+        if app.turn_data[-1]['played_safe'] == True:
+            app.current_player.safeties -= 1
+        app.turn_data.pop()
 
 
 

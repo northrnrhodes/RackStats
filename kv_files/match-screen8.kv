@@ -25,16 +25,14 @@
             rounded_rectangle: (self.x, self.y, self.width, self.height, 20)
             width: 2.5
 
-    Button:
+    ImageButton:
         id: play_pause_btn
         size_hint: None, None
         size: '25dp', '25dp'
         pos_hint: {'center_y': 0.5}
-
-        #2. UI: Automatically toggle the image based on the App state
-        background_normal: 'images/pause.png' if app.is_running else 'images/play.png'
-        background_down: 'images/pause.png' if app.is_running else 'images/play.png'
-        background_color: (1, 1, 1, 1)
+        allow_stretch: True
+        keep_ratio: True
+        source: 'images/pause.png' if app.is_running else 'images/play.png'
         on_release: app.start_timer() if not app.is_running else app.stop_timer()
 
 
@@ -144,33 +142,6 @@
 
         #custom navbar at the top
         NavBar:
-
-
-        #BoxLayout:
-            #orientation: 'vertical'
-            #size_hint_y: None
-            #padding: 20, 0, 20, 0
-
-            #GoldButton:
-                #text: 'Main Menu'
-                #size_hint: (0.5, 0.5)
-                #on_release: app.change_screen('home_screen')
-
-
-
-                 # --- Custom Separator Line below the header ---
-            #Widget:
-                #size_hint_y: None
-                #height: dp(2)
-                #canvas:
-                    #Color:
-                        #rgba: utils.get_color_from_hex(app.accent_color)
-                    #Rectangle:
-                        #pos: self.pos
-                        #size: self.size
-
-
-
 
 
         # Main horizontal container containing player cards
