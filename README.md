@@ -4,7 +4,7 @@ Includes both 8 ball and 9 Ball scoring metrics.
 
 ## App Preview
 <p align="center">
-  <img src="Rackstats_preview.gif" width="300" alt="RackStats Demo">
+  <img src="RackStats_preview.gif" width="300" alt="RackStats Demo">
 </p>
 
 ---
