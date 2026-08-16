@@ -154,8 +154,8 @@
 
             PlayerBox:
                 player_name: app.player1.name if app.player1 else "Player 1"
-                defensive_count: app.player1.safeties
-                wins_count: app.player1.wins
+                defensive_count: app.p1_safe
+                wins_count: app.p1_wins
                 is_active: app.current_player == app.player1
 
 
@@ -167,8 +167,8 @@
 
             PlayerBox:
                 player_name: app.player2.name if app.player2 else "Player 2"
-                defensive_count: app.player2.safeties
-                wins_count: app.player2.wins
+                defensive_count: app.p2_safe
+                wins_count: app.p2_wins
                 is_active: app.current_player == app.player2
 
 
@@ -232,13 +232,24 @@
             size_hint_y: 1.0
 
 
+<PoolBallToggle@ToggleButtonBehavior+Image>:
+    #image constraints
+    allow_stretch: True
+    keep_ratio: True
+
+    # 2. Automatically drop the opacity to 50% when selected
+    opacity: 0.5 if self.state == 'down' else 1.0
+
+    # 3. Keep the size constraints so they scale perfectly
+    size_hint: (1, 1)
+
+
+
 
 <SafetyToggle@ToggleButton>
     # Remove the default Kivy grey button background
     background_color: 0, 0, 0, 0
     background_normal: ''
-
-
 
     # Text styling (Dark blue text to match the app background)
     color: utils.get_color_from_hex(app.main_color)
@@ -268,8 +279,273 @@
 
 
 
-# Define the game end Popup UI
+# Define the standard game end Popup UI
 <GameEndPopup>:
+              #width x height
+    size_hint: (0.85, 0.90)
+
+    #minimum constraints for responsiveness
+    size_hint_min_x: dp(300)
+    size_hint_max_x: dp(450)
+
+    #default title is empty string
+    title: ""
+
+    separator_height: 0  # Hide Kivy's default top separator line
+    # Pushes the popup higher on the screen
+    pos_hint: {'center_x': 0.5, 'top': 0.95}
+    auto_dismiss: False
+
+    BoxLayout:
+        orientation: 'vertical'
+        padding: dp(15)
+        spacing: dp(10)
+
+        #custom title label with "X" button
+        BoxLayout:
+            size_hint_y: None
+            height: dp(40)
+            padding: [0, dp(2), 0, dp(2)]
+
+            Label:
+                text: "What happened?"
+                font_size: '18sp'
+                bold: True
+                halign: 'center'
+                valign: 'middle'
+
+            Button:
+                text: "X"
+                size_hint: (None, None)
+                height: self.parent.height * 0.5
+                width: self.height
+                font_size: '14sp'
+                pos_hint: {'center_y': 0.5}
+                background_normal: ''
+                background_color: (0.8, 0.2, 0.2, 1)
+                on_release: root.dismiss()
+
+        # --- Custom Separator Line below the header ---
+        Widget:
+            size_hint_y: None
+            height: dp(2)
+            canvas:
+                Color:
+                    rgba: utils.get_color_from_hex(app.accent_color)
+                Rectangle:
+                    pos: self.pos
+                    size: self.size
+
+        #Main container that holds error labels, buttons and ball selectors.
+        BoxLayout:
+            orientation: 'vertical'
+            size_hint_y: 0.88
+            spacing: dp(8)
+            padding: [dp(5), dp(5), dp(5), dp(5)]
+
+             # New error label
+            Label:
+                id: error_label
+                text: ""
+                color: 1, 0, 0, 1 # Red text
+                font_size: '14sp'
+                size_hint_y: 0.05
+
+
+            SafetyToggle:
+                group: 'game_over'
+                id: made_8ball
+                text: 'Made 8 Ball'
+                size_hint: (0.8, 0.10)
+                font_size: '15sp'
+
+            SafetyToggle:
+                group: 'game_over'
+                id: early_8
+                text: 'Made 8 ball early'
+                size_hint: (0.8, 0.10)
+                font_size: '15sp'
+
+            SafetyToggle:
+                group: 'game_over'
+                id: wrong_pocket
+                text: '8 Ball wrong pocket'
+                size_hint: (0.8, 0.10)
+                font_size: '15sp'
+
+
+            SafetyToggle:
+                group: 'game_over'
+                id: scratched
+                text: 'Scratched on 8 Ball'
+                size_hint: (0.8, 0.10)
+                font_size: '15sp'
+
+
+            Widget:
+                size_hint_y: .05
+
+
+            #Toggle buttons for selecting opponent balls remaining
+            BoxLayout:
+                orientation: 'vertical'
+                spacing: dp(2)
+                size_hint_y: 0.28
+
+                Label:
+                    text: 'Opp. Balls Remaining'
+                    font_size: '14sp'
+                    size_hint_y: 0.20
+                    color: utils.get_color_from_hex(app.accent_color)
+
+
+
+                #pool ball image buttons
+                #row 1, balls 0, 1, 2, 3
+                BoxLayout:
+                    orientation: 'horizontal'
+                    size_hint_y: .4
+                    spacing: dp(6)
+                    PoolBallToggle:
+                        on_press: root.on_ball_toggle(self, self.state, 'opp_balls')
+                        group: 'opp_balls'
+                        source: 'images/cue_ball.png'
+                        ball_value: 0
+                    PoolBallToggle:
+                        on_press: root.on_ball_toggle(self, self.state, 'opp_balls')
+                        group: 'opp_balls'
+                        source: 'images/one_ball.png'
+                        ball_value: 1
+                    PoolBallToggle:
+                        on_press: root.on_ball_toggle(self, self.state, 'opp_balls')
+                        group: 'opp_balls'
+                        source: 'images/two_ball.png'
+                        ball_value: 2
+                    PoolBallToggle:
+                        on_press: root.on_ball_toggle(self, self.state, 'opp_balls')
+                        group: 'opp_balls'
+                        source: 'images/three_ball.png'
+                        ball_value: 3
+
+                # Row 2, balls 4, 5, 6, 7
+                BoxLayout:
+                    orientation: 'horizontal'
+                    size_hint_y: 0.4
+                    spacing: dp(6)
+
+                    PoolBallToggle:
+                        on_press: root.on_ball_toggle(self, self.state, 'opp_balls')
+                        group: 'opp_balls'
+                        source: 'images/four_ball.png'
+                        ball_value: 4
+                    PoolBallToggle:
+                        on_press: root.on_ball_toggle(self, self.state, 'opp_balls')
+                        group: 'opp_balls'
+                        source: 'images/five_ball.png'
+                        ball_value: 5
+                    PoolBallToggle:
+                        on_press: root.on_ball_toggle(self, self.state, 'opp_balls')
+                        group: 'opp_balls'
+                        source: 'images/six_ball.png'
+                        ball_value: 6
+                    PoolBallToggle:
+                        on_press: root.on_ball_toggle(self, self.state, 'opp_balls')
+                        group: 'opp_balls'
+                        source: 'images/seven_ball.png'
+                        ball_value: 7
+
+
+            #spacer widget to separate the opponent balls and current player balls containers
+            Widget:
+                size_hint_y: .015
+
+
+            #dynamic BoxLayout appears when 'made 8 early' button state == down
+            #select current players balls remaining
+            BoxLayout:
+                orientation: 'vertical'
+                spacing: dp(2)
+                # If made_8ball is down, it expands to 0.34. Otherwise, it collapses to 0 height.
+                size_hint_y: 0.28
+                opacity: 1 if early_8.state == 'down' else 0
+                disabled: early_8.state != 'down'
+
+                Label:
+                    text: 'Current player balls remaining'
+                    font_size: '14sp'
+                    size_hint_y: 0.20
+                    color: utils.get_color_from_hex(app.accent_color)
+
+                #pool ball image buttons (Row 1)
+                BoxLayout:
+                    orientation: 'horizontal'
+                    size_hint_y: .4
+                    spacing: dp(6)
+
+                    PoolBallToggle:
+                        on_press: root.on_ball_toggle(self, self.state, 'player_balls')
+                        group: 'player_balls'
+                        source: 'images/cue_ball.png'
+                        ball_value: 0
+                    PoolBallToggle:
+                        on_press: root.on_ball_toggle(self, self.state, 'player_balls')
+                        group: 'player_balls'
+                        source: 'images/one_ball.png'
+                        ball_value: 1
+                    PoolBallToggle:
+                        on_press: root.on_ball_toggle(self, self.state, 'player_balls')
+                        group: 'player_balls'
+                        source: 'images/two_ball.png'
+                        ball_value: 2
+                    PoolBallToggle:
+                        on_press: root.on_ball_toggle(self, self.state, 'player_balls')
+                        group: 'player_balls'
+                        source: 'images/three_ball.png'
+                        ball_value: 3
+
+
+                # Row 2
+                BoxLayout:
+                    orientation: 'horizontal'
+                    size_hint_y: .4
+                    spacing: dp(6)
+
+                    PoolBallToggle:
+                        on_press: root.on_ball_toggle(self, self.state, 'player_balls')
+                        group: 'player_balls'
+                        source: 'images/four_ball.png'
+                        ball_value: 4
+                    PoolBallToggle:
+                        on_press: root.on_ball_toggle(self, self.state, 'player_balls')
+                        group: 'player_balls'
+                        source: 'images/five_ball.png'
+                        ball_value: 5
+                    PoolBallToggle:
+                        on_press: root.on_ball_toggle(self, self.state, 'player_balls')
+                        group: 'player_balls'
+                        source: 'images/six_ball.png'
+                        ball_value: 6
+                    PoolBallToggle:
+                        on_press: root.on_ball_toggle(self, self.state, 'player_balls')
+                        group: 'player_balls'
+                        source: 'images/seven_ball.png'
+                        ball_value: 7
+
+
+        Widget:
+            size_hint_y: 0.1
+
+
+        GoldButton:
+            text: 'Submit'
+            size_hint: (.5, 0.10)
+            font_size: '15sp'
+            on_release: root.get_game_results()
+
+
+
+#define 8 Ball break or Break and run popup
+<BreakGameEnd>
     size_hint: (0.8, 0.5)
     title: ""
 
@@ -326,18 +602,19 @@
             height: dp(30)
 
 
+
         SafetyToggle:
             group: 'game_over'
-            id: made_8ball
-            text: 'Made 8 Ball'
+            id: eight_ball_break
+            text: '8 Ball break'
             size_hint: (.5, .05)
             font_size: '15sp'
 
 
         SafetyToggle:
             group: 'game_over'
-            id: wrong_pocket
-            text: '8 Ball wrong pocket'
+            id: break_and_run
+            text: 'Break and Run'
             size_hint: (.5, .05)
             font_size: '15sp'
 
@@ -345,7 +622,7 @@
         SafetyToggle:
             group: 'game_over'
             id: scratched
-            text: 'Scratched on 8 Ball'
+            text: 'Made 8 ball but scratched'
             size_hint: (.5, .05)
             font_size: '15sp'
 
@@ -354,13 +631,11 @@
             size_hint_y: 0.1
 
 
-
         GoldButton:
             text: 'Submit'
             size_hint: (.5, .05)
             font_size: '15sp'
             on_release: root.get_game_results()
-
 
 
 
@@ -383,33 +658,35 @@
             pos: self.x, self.y
             #set width to take up entire screen and thickness of line to dp(2)
             size: self.width, dp(2)
-    Button:
-        text: '< Menu'
-        font_size: '18sp'
-        size_hint_x: None
-        width: dp(80)
-        background_color: 0, 0, 0, 0
-        color: utils.get_color_from_hex(app.accent_color)
-        on_release: app.menu_button()
+    BoxLayout:
+        size_hint_x: 0.25
+        Button:
+            text: '< Menu'
+            font_size: '18sp'
+            size_hint_x: 1
+            background_color: 0, 0, 0, 0
+            color: utils.get_color_from_hex(app.accent_color)
+            on_release: app.menu_button()
 
     Label:
         text: root.game_type
         color: utils.get_color_from_hex(app.accent_color)
-        size_hint_x: 1
+        size_hint_x: 0.5
         font_size: '18sp'
         bold: True
         text_size: self.size
         halign: 'center'
         valign: 'middle'
 
-    Label:
-        text: root.match_time
-        color: utils.get_color_from_hex(app.accent_color)
-        size_hint_x: None
-        width: self.texture_size[0]  # Dynamically sizes width to fit text perfectly on one line
-        font_size: '18sp'
-        halign: 'right'
-        valign: 'middle'
+    BoxLayout:
+        size_hint_x: 0.25
+        Label:
+            text: root.match_time
+            color: utils.get_color_from_hex(app.accent_color)
+            size_hint_x: 1
+            font_size: '18sp'
+            halign: 'right'
+            valign: 'middle'
 
 
 #main menu quit game popup

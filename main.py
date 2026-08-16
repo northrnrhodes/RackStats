@@ -35,6 +35,10 @@ class BilliardsScorekeeping(App):
     players = ListProperty([])
     player1 = ObjectProperty(Player())
     player2 = ObjectProperty(Player())
+    p1_wins = NumericProperty(0)
+    p2_wins = NumericProperty(0)
+    p1_safe = NumericProperty(0)
+    p2_safe = NumericProperty(0)
     current_player = ObjectProperty(None, allownone=True)
 
     turns = NumericProperty(0)

@@ -1,5 +1,5 @@
 from kivy.event import EventDispatcher
-from kivy.properties import StringProperty, NumericProperty
+from kivy.properties import StringProperty, NumericProperty, ListProperty
 import json
 import os
 from kivy.app import App
@@ -11,16 +11,19 @@ from kivy.app import App
 class Player(EventDispatcher):
     name = StringProperty("")
     user_id = StringProperty(None)
-    safeties = NumericProperty(0)
-    wins = NumericProperty(0)
+    total_safeties = NumericProperty(0)
+    total_wins = NumericProperty(0)
+
+    #records balls made per rack, length of list is total games played
+    balls_history = ListProperty([])
 
 
     def play_safety(self):
-        self.safeties += 1
+        self.total_safeties += 1
 
 
     def add_win(self):
-        self.wins += 1
+        self.total_wins += 1
 
 
 
