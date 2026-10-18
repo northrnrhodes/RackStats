@@ -58,6 +58,12 @@
 
 
 <SetupScreen>:
+    canvas.before:
+        Color:
+            rgba: utils.get_color_from_hex(app.main_color)
+        Rectangle:
+            pos: self.pos
+            size: self.size
     BoxLayout:
         orientation: 'vertical'
         padding: dp(20)
@@ -158,14 +164,15 @@
             pos_hint: {'center_x': 0.5}
             on_release: root.start_match()
 
+
         Widget: # Pushes everything to the top
             size_hint_y: 1.0
 
         GoldButton:
             text: "Back"
             size: dp(160), dp(60)
-            size_hint: None, None # CHANGED: Crucial fix!
-            size: dp(160), dp(60) # CHANGED: Set fixed size
+            size_hint: None, None
+            size: dp(160), dp(60)
             on_release: app.change_screen('choose_game', 'right')
 
         # ADDED: This provides the bottom safe area padding

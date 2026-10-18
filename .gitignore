@@ -14,3 +14,7 @@ DerivedData/
 *.mode2v3
 *.perspectivev3
 xcuserdata/
+/json_formatting.py
+
+/match_history.json
+/player_list.json

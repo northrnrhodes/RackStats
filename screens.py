@@ -80,8 +80,10 @@ class GameEndPopup(Popup):
         if state == 'down':
             if group_type == 'opp_balls':
                 self.selected_opp_ball = button.ball_value
+                print(f'Oppenent had {self.selected_opp_ball} balls left!')
             elif group_type == 'player_balls':
                 self.selected_player_ball = button.ball_value
+                print(f'Current player had {self.selected_player_ball} balls left!')
 
     def made_8ball(self):
         app = App.get_running_app()
@@ -95,6 +97,28 @@ class GameEndPopup(Popup):
             app.p2_wins +=1
 
         print(self.game_end_event)
+
+
+    def early_8(self):
+        app = App.get_running_app()
+        self.game_end_event = f"{app.current_player.name} made 8ball early!"
+        if self.player1 == app.current_player:
+            self.player2.add_win()
+            app.p2_wins += 1
+            self.game_winner = app.player2
+        else:
+            self.game_winner = app.player1
+            self.player1.add_win()
+            app.p1_wins += 1
+
+        app.record_turn_time()
+        app.turns += 1
+        app.innings = app.turns // 2
+        # this code has to run last in method!!!
+
+        app.current_player = self.player2 if app.current_player == self.player1 else self.player1
+
+
 
     def made_8ball_wrong_pocket(self):
         app = App.get_running_app()
@@ -149,6 +173,8 @@ class GameEndPopup(Popup):
         app = App.get_running_app()
         if self.ids.made_8ball.state == 'down':
             self.made_8ball()
+        elif self.ids.early_8.state == 'down':
+            self.early_8()
 
         elif self.ids.wrong_pocket.state == 'down':
             self.made_8ball_wrong_pocket()
@@ -156,6 +182,16 @@ class GameEndPopup(Popup):
         elif self.ids.scratched.state == 'down':
             self.scratched_on_8ball()
 
+
+        # --- PLAYER OBJECT UPDATE LOGIC to record balls remaining history---
+        current_shooter = app.current_player
+        opponent_player = self.player2 if current_shooter == self.player1 else self.player1
+
+        if p1_balls_rem is not None:
+            current_shooter.update_ball_history(p1_balls_rem)
+
+        if p2_balls_rem is not None:
+            opponent_player.update_ball_history(p2_balls_rem)
 
 
         # 1. Create a structured entry for this match
@@ -230,6 +266,10 @@ class GameEndPopup(Popup):
         except:
             self.ids.error_label.text = "Match saved failed!"
             self.ids.error_label.color = (1, 0, 0, 1)  # Red
+
+        #revert remaining balls back to None
+        self.selected_opp_ball = None
+        self.selected_player_ball = None
 
     def close_popup(self, dt=None):
         self.dismiss()
@@ -391,7 +431,6 @@ class ExitGamePopup(Popup):
 
     def quit_game(self):
         app = App.get_running_app()
-        app.reset_game_state()
         self.close()
         app.change_screen('home_screen', 'right')
 
@@ -440,6 +479,8 @@ class SetupScreen(Screen):
             self.ids.setup_error_label.text = "Please add players to start match!"
             return
 
+        #reset all stats to 0 for new game
+        app.reset_game_state()
         self.ids.setup_error_label.text = ""
         self.won_break(app)
 

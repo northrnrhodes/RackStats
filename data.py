@@ -11,19 +11,21 @@ from kivy.app import App
 class Player(EventDispatcher):
     name = StringProperty("")
     user_id = StringProperty(None)
-    total_safeties = NumericProperty(0)
-    total_wins = NumericProperty(0)
+    safeties = NumericProperty(0)
+    wins = NumericProperty(0)
 
     #records balls made per rack, length of list is total games played
     balls_history = ListProperty([])
 
 
     def play_safety(self):
-        self.total_safeties += 1
-
+        self.safeties += 1
 
     def add_win(self):
-        self.total_wins += 1
+        self.wins += 1
+
+    def update_ball_history(self, balls_remaining):
+        self.balls_history.append(balls_remaining)
 
 
 
@@ -34,7 +36,9 @@ class SaveData():
     def get_path(user_data_dir):
         '''retrieves directory for match history data. creates directory if it doesn't exist'''
 
-        if 'Library' in user_data_dir:
+        if 'Documents' in user_data_dir:
+            documents_dir = user_data_dir.split('Documents')[0] + 'Documents'
+        elif 'Library' in user_data_dir:
             # Splits path to jump from 'Library/...' to the root, then into 'Documents'
             documents_dir = os.path.join(user_data_dir.split('Library')[0], 'Documents')
         else:
@@ -42,9 +46,13 @@ class SaveData():
 
         return os.path.join(documents_dir, 'match_history.json')
 
+    @staticmethod
     def get_player_path(user_data_dir):
         '''retrieves directory for available users list. creates directory if it doesn't exist'''
-        if 'Library' in user_data_dir:
+
+        if 'Documents' in user_data_dir:
+            documents_dir = user_data_dir.split('Documents')[0] + 'Documents'
+        elif 'Library' in user_data_dir:
             documents_dir = os.path.join(user_data_dir.split('Library')[0], 'Documents')
 
         else:
@@ -108,6 +116,11 @@ class SaveData():
 
             with open(path, 'w') as f:
                 json.dump(player_data, f, indent=4)
+
+            print(f"Player data successfully saved to: {path}")
+            print("-----------------------------")
+            print(json.dumps(player_data, indent=4))
+            print("-----------------------------")
 
         except Exception as e:
             print(f'Failed to save players: {e}')
