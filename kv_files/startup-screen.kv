@@ -1,16 +1,36 @@
 #:import utils kivy.utils
 <StartupScreen>
+    # Set the dark background for the screen
+    canvas.before:
+        Color:
+            rgba: utils.get_color_from_hex(app.main_color if hasattr(app, 'main_color') else '#121718')
+        Rectangle:
+            size: self.size
+            pos: self.pos
     FloatLayout:
-        canvas.before:
-            Color:
-                rgb: utils.get_color_from_hex(app.main_color)
-            Rectangle:
-                pos: self.pos
-                size: self.size
+        size_hint: None, None
+        size: '550dp', '480dp'
+        pos_hint: {'center_x': 0.5, 'center_y': 0.55}
 
+        # 1. The Logo Image
         Image:
-            source: 'images/rackemSticker.png'
-            pos_hint: {'center_x':0.5, 'center_y': 0.6}
-        Image:
-            source: 'images/scorekeeperSticker.png'
-            pos_hint: {'center_x':0.5, 'center_y': 0.5}
+            source: 'images/Firefly.png'
+            size_hint: None, None
+            size: '550dp', '380dp'
+            pos_hint: {'center_x': 0.5, 'center_y': 0.55}
+            allow_stretch: True
+            keep_ratio: True
+
+        # 2. SCOREKEEPER text pulled up to overlap/sit right under the RACKSTATS text
+        Label:
+            text: "S C O R E K E E P E R"
+            font_size: '22sp'
+            bold: True
+            color: 1, 159/255, 67/255, 1
+            size_hint: None, None
+            size: '550dp', '40dp'
+            # Adjust 'center_y' lower or higher to place it precisely where you want it
+            pos_hint: {'center_x': 0.5, 'center_y': 0.35}
+            halign: 'center'
+            valign: 'middle'
+            text_size: self.size

@@ -19,7 +19,7 @@
     canvas.before:
         #set border color
         Color:
-            rgba: utils.get_color_from_hex(app.accent_color)
+            rgba: utils.get_color_from_hex(app.text_color2)
         Line:
             #draw rounded rectangle
             rounded_rectangle: (self.x, self.y, self.width, self.height, 20)
@@ -40,7 +40,7 @@
         text: app.timer_text
         font_size: '24sp'
         valign: 'middle'
-        color: utils.get_color_from_hex(app.accent_color)
+        color: utils.get_color_from_hex(app.text_color2)
 
 
 
@@ -66,17 +66,19 @@
 
 
 
-        #border styling logic
+       #Dynamic border color (Bright amber when active, subtle faint white/grey when inactive)
         Color:
-            rgba: utils.get_color_from_hex(app.accent_color)
+            rgba: utils.get_color_from_hex(app.text_color2) if root.is_active else (1, 1, 1, 0.15)
+
+        # Dynamic border width (Slightly thicker when active to make it pop)
         Line:
-            width: dp(1.5)
+            width: dp(2.0) if root.is_active else dp(1.0)
             rounded_rectangle: (self.x, self.y, self.width, self.height, dp(10))
 
     Label:
         text: root.player_name
         font_size: '30sp'
-        color: utils.get_color_from_hex(app.accent_color)
+        color: utils.get_color_from_hex(app.text_color2)
         text_size: (self.width, self.height) # Forces the label to fill the box
         halign: 'center'
         valign: 'top' # Pins text to the top
@@ -99,7 +101,7 @@
         Label:
             text: str(root.wins_count)
             font_size: '20sp'
-            color: utils.get_color_from_hex(app.accent_color)
+            color: utils.get_color_from_hex(app.text_color2)
             # ### CHANGED: Set size_hint_x to fill space between icons
             size_hint_x: 0.5
 
@@ -113,7 +115,7 @@
         Label:
             text: str(root.defensive_count)
             font_size: '20sp'
-            color: utils.get_color_from_hex(app.accent_color)
+            color: utils.get_color_from_hex(app.text_color2)
             # ### CHANGED: Set size_hint_x to fill space between icons
             size_hint_x: 0.5
 
@@ -163,7 +165,7 @@
                 text: "vs"
                 size_hint_x: 0.2
                 font_size: '35sp'
-                color: utils.get_color_from_hex(app.accent_color)
+                color: utils.get_color_from_hex(app.text_color2)
 
             PlayerBox:
                 player_name: app.player2.name if app.player2 else "Player 2"
@@ -264,7 +266,7 @@
     # Drawing the rounded rectangle and border
     canvas.before:
         Color:
-            rgba: utils.get_color_from_hex(app.accent_color) if self.state == "normal" else (1,1,1,1)
+            rgba: utils.get_color_from_hex(app.text_color2) if self.state == "normal" else (1,1,1,1)
         RoundedRectangle:
             size: self.size
             pos: self.pos
@@ -331,7 +333,7 @@
             height: dp(2)
             canvas:
                 Color:
-                    rgba: utils.get_color_from_hex(app.accent_color)
+                    rgba: utils.get_color_from_hex(app.text_color2)
                 Rectangle:
                     pos: self.pos
                     size: self.size
@@ -396,7 +398,7 @@
                     text: 'Opp. Balls Remaining'
                     font_size: '14sp'
                     size_hint_y: 0.20
-                    color: utils.get_color_from_hex(app.accent_color)
+                    color: utils.get_color_from_hex(app.text_color2)
 
 
 
@@ -474,7 +476,7 @@
                     text: 'Current player balls remaining'
                     font_size: '14sp'
                     size_hint_y: 0.20
-                    color: utils.get_color_from_hex(app.accent_color)
+                    color: utils.get_color_from_hex(app.text_color2)
 
                 #pool ball image buttons (Row 1)
                 BoxLayout:
@@ -539,7 +541,7 @@
         GoldButton:
             text: 'Submit'
             size_hint: (.5, 0.10)
-            font_size: '15sp'
+            font_size: '30sp'
             on_release: root.get_game_results()
 
 
@@ -586,7 +588,7 @@
             height: dp(2)
             canvas:
                 Color:
-                    rgba: utils.get_color_from_hex(app.accent_color)
+                    rgba: utils.get_color_from_hex(app.text_color2)
                 Rectangle:
                     pos: self.pos
                     size: self.size
@@ -653,7 +655,7 @@
     #bottom seperator line
     canvas.before:
         Color:
-            rgba: utils.get_color_from_hex(app.accent_color)
+            rgba: utils.get_color_from_hex(app.text_color2)
         Rectangle:
             pos: self.x, self.y
             #set width to take up entire screen and thickness of line to dp(2)
@@ -665,12 +667,12 @@
             font_size: '18sp'
             size_hint_x: 1
             background_color: 0, 0, 0, 0
-            color: utils.get_color_from_hex(app.accent_color)
+            color: utils.get_color_from_hex(app.text_color2)
             on_release: app.menu_button()
 
     Label:
         text: root.game_type
-        color: utils.get_color_from_hex(app.accent_color)
+        color: utils.get_color_from_hex(app.text_color2)
         size_hint_x: 0.5
         font_size: '18sp'
         bold: True
@@ -682,7 +684,7 @@
         size_hint_x: 0.25
         Label:
             text: root.match_time
-            color: utils.get_color_from_hex(app.accent_color)
+            color: utils.get_color_from_hex(app.text_color2)
             size_hint_x: 1
             font_size: '18sp'
             halign: 'right'

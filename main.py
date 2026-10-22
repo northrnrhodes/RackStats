@@ -23,6 +23,8 @@ if platform not in ('ios', 'android'):
     Config.set('graphics', 'top', '100')
     Config.write()  # Writes this to ensure it overrides cache on restart
 
+    Window.size = (430, 932)
+
     try:
         import sys
         import os
@@ -129,16 +131,14 @@ if platform not in ('ios', 'android'):
         traceback.print_exc()
 
 
-
-
-#comment out this code before building in xcode
-Window.size = (430, 932)
-
-# smooths out screen transition
-Window.clearcolor = (16/255, 42/255, 68/255, 1)
+4
+# # smooths out screen transition
+# Window.clearcolor = (16/255, 42/255, 68/255, 1)
 #
 # # smooths out screen transition to match charcoal background
 # Window.clearcolor = (37/255, 37/255, 37/255, 1)
+
+Window.clearcolor = (18/255, 23/255, 24/255, 1)
 
 
 class ImageButton(ButtonBehavior, Image):
@@ -184,11 +184,14 @@ class BilliardsScorekeeping(App):
     game_data = DictProperty()
 
     # #color themes
-    main_color = StringProperty('#102A44') #darkblue
-    accent_color = StringProperty('#A48B5D') #gold
+    # main_color = StringProperty('#102A44') #darkblue
+    # accent_color = StringProperty('#A48B5D') #gold
 
-    # main_color = StringProperty('#252525') #charcoal grey
-    # accent_color = StringProperty('#4AF6A9') #mint green
+    main_color = StringProperty('#121718') #charcoal grey main canvas
+    charcoal_2 = StringProperty('#1A2123')#button/card fills
+    # grey_green = StringProperty('#3A5A48') #secondary grey/green
+    text_color1 = StringProperty('#4CEB63') #mint green for text
+    text_color2 = StringProperty('#FF9F43') #amber/neon orange for text and border highlights
     # accent_color = StringProperty('#FFB259') #bright orange
 
     def on_start(self):

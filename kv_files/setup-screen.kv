@@ -28,7 +28,7 @@
     Label:
         text: root.title # Uses the property defined above
         font_size: '16sp'
-        color: utils.get_color_from_hex(app.accent_color)
+        color: utils.get_color_from_hex(app.text_color2)
         size_hint_y: None
         height: dp(20)
 
@@ -48,12 +48,13 @@
     # Smaller Edit Button
     GoldButton:
         text: "Edit"
+        text_color: app.text_color2
         size_hint: None, None
         width: dp(50) # Fixed size for the button
         font_size: '16sp'
         height: dp(25)
         pos_hint: {'center_x': 0.5}
-         # UPDATED: Pass the ID (1 or 2) to the screen
+         #  Pass the ID (1 or 2) to the screen
         on_release: app.root.ids.setup_screen.show_popup(1 if root.title == "Player 1" else 2)
 
 
@@ -79,13 +80,13 @@
             size_hint_y: None
             height: dp(80)
             font_size: '32sp'
-            color: utils.get_color_from_hex(app.accent_color)
+            color: utils.get_color_from_hex(app.text_color2)
         Label:
             text: app.game_type
             size_hint_y: None
             height: dp(45)
             font_size: '24sp'
-            color: utils.get_color_from_hex(app.accent_color)
+            color: utils.get_color_from_hex(app.text_color2)
 
         # Main horizontal container
         BoxLayout:
@@ -102,7 +103,7 @@
                 text: "vs"
                 size_hint_x: 0.2
                 font_size: '35sp'
-                color: utils.get_color_from_hex(app.accent_color)
+                color: utils.get_color_from_hex(app.text_color2)
 
             PlayerSlot:
                 id: p2_slot
@@ -112,7 +113,7 @@
             height: dp(40)
             size_hint_y: None
             text: 'Shoots First'
-            color: utils.get_color_from_hex(app.accent_color)
+            color: utils.get_color_from_hex(app.text_color2)
             font_size: '20sp'
             pos_hint: {'center_x': 0.5, 'center_y':0.5}
             padding: 0, 10, 0, 10
@@ -160,6 +161,7 @@
         GoldButton:
             text: "START MATCH"
             size_hint: 0.5, None
+            font_size: '26sp'
             height: dp(60)
             pos_hint: {'center_x': 0.5}
             on_release: root.start_match()
@@ -171,6 +173,7 @@
         GoldButton:
             text: "Back"
             size: dp(160), dp(60)
+            text_color: app.text_color2
             size_hint: None, None
             size: dp(160), dp(60)
             on_release: app.change_screen('choose_game', 'right')
@@ -187,7 +190,7 @@
     size_hint: (0.8, 0.5)
     title: "Manage Player"
     title_align: 'center'  # Centers "Select Player" text
-    separator_color: utils.get_color_from_hex(app.accent_color)
+    separator_color: utils.get_color_from_hex(app.text_color2)
     # Pushes the popup higher on the screen
     pos_hint: {'center_x': 0.5, 'top': 0.9}
 
@@ -243,7 +246,7 @@
     width:  dp(75)
 
     # Remove the default Kivy grey button background
-    background_color: (1,1,1,1) if self.state == 'down' else app.accent_color
+    background_color: (1,1,1,1) if self.state == 'down' else app.text_color2
     background_down: ''
     background_normal: ''
 

@@ -1,7 +1,7 @@
 #:import utils kivy.utils
 
 <StatsScreen>
-    # Set the dark blue background for the entire screen
+    # set the screen background
     canvas.before:
         Color:
             rgba: utils.get_color_from_hex(app.main_color)
@@ -21,7 +21,7 @@
             pos_hint: {"top": .9, "left": 1}
 
             text: 'Stats Coming Soon!'
-            color: utils.get_color_from_hex(app.accent_color)
+            color: utils.get_color_from_hex(app.text_color2)
             font_size: dp(25)
 
 
@@ -36,7 +36,7 @@
             # 2. The suppressed tap animation
             opacity: 0.6 if self.state == 'down' else 1.0
 
-            # Text styling (Dark blue text to match the app background)
+            # Text styling
             color: utils.get_color_from_hex(app.main_color)
             bold: True
             font_size: '22sp'
@@ -50,7 +50,7 @@
             # Drawing the rounded rectangle and border
             canvas.before:
                 Color:
-                    rgba: utils.get_color_from_hex(app.accent_color)
+                    rgba: utils.get_color_from_hex(app.charcoal_2)
                 RoundedRectangle:
                     size: self.size
                     pos: self.pos

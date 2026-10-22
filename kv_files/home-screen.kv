@@ -2,7 +2,8 @@
 
 # --- CUSTOM BUTTON DESIGN ---
 <GoldButton@Button>:
-    btn_color: app.accent_color if (app and hasattr(app, 'accent_color') and app.accent_color) else '#A48B5D'
+    btn_color: app.charcoal2 if (app and hasattr(app, 'app.charcoal2') and app.charcoal2) else '#1A2123'
+    text_color: app.text_color1 if (app and hasattr(app, 'app.text_color1') and app.text_color1) else '#4CEB63'
     # Remove the default Kivy grey button background
     background_color: 0, 0, 0, 0
     background_normal: ''
@@ -11,10 +12,10 @@
     # 2. The suppressed tap animation
     opacity: 0.6 if self.state == 'down' else 1.0
 
-    # Text styling (Dark blue text to match the app background)
-    color: utils.get_color_from_hex(app.main_color)
+    # Text styling
+    color: utils.get_color_from_hex(self.text_color if (self.text_color and isinstance(self.text_color, str)) else '#4CEB63')
     bold: True
-    font_size: '22sp'
+    font_size: '30sp'
 
     # Sizing (Fixed size so they look uniform)
     size_hint: None, None
@@ -24,7 +25,7 @@
     # Drawing the rounded rectangle and border
     canvas.before:
         Color:
-            rgba: utils.get_color_from_hex(self.btn_color if (self.btn_color and isinstance(self.btn_color, str)) else '#A48B5D')
+            rgba: utils.get_color_from_hex(self.btn_color if (self.btn_color and isinstance(self.btn_color, str)) else '#1A2123')
         RoundedRectangle:
             size: self.size
             pos: self.pos
@@ -39,7 +40,6 @@
 
 # --- MAIN SCREEN LAYOUT ---
 <HomeScreen>:
-    # Set the dark blue background for the entire screen
     canvas.before:
         Color:
             rgba: utils.get_color_from_hex(app.main_color)
@@ -49,75 +49,80 @@
 
     BoxLayout:
         orientation: 'vertical'
+        padding: [dp(20), dp(20), dp(20), dp(20)]
 
         # 1. TOP SAFE AREA (Notch padding)
         Widget:
             size_hint_y: None
-            height: dp(60)
+            size_hint_y: 0.05
 
-        # 2. LOGO IMAGES
-        BoxLayout:
-            orientation: 'vertical'
-            size_hint_y: None
-            height: dp(200)  # Adjust this total height based on your image sizes
-            spacing: dp(-15)
+        FloatLayout:
+            size_hint: (1, 0.35)  # Takes up 35% of vertical screen space
 
+            # The Logo Image scaled responsively
             Image:
-                source: 'images/rackemSticker_final.png'
-                allow_stretch: True
-                keep_ratio: True
-                size_hint: None, None
-                size: dp(280), dp(120)
-
-                pos_hint: {'center_x': 0.5}
-
-            Image:
-                source: 'images/scorekeeperSticker_final.png'
+                source: 'images/Firefly.png'
+                size_hint: (1.15, 1.15)  # Scales relative to the container width/height
+                pos_hint: {'center_x': 0.5, 'center_y': 0.55}
                 allow_stretch: True
                 keep_ratio: True
 
-                size_hint: None, None
-                size: dp(180), dp(60)
-                pos_hint: {'center_x': 0.5}
+            # SCOREKEEPER text positioned relative to the container
+            Label:
+                text: "S C O R E K E E P E R"
+                font_size: '18sp'
+                bold: True
+                color: 1, 159/255, 67/255, 1
+                size_hint: (1, None)
+                height: dp(30)
+                pos_hint: {'center_x': 0.5, 'center_y': 0.25}
+                halign: 'center'
+                valign: 'middle'
+                text_size: self.size
 
-
-        # 3. MIDDLE SPACER (Pushes buttons down)
+       # 3. MIDDLE SPACER (Separates logo from buttons)
         Widget:
-            size_hint_y: None
-            height: dp(80)
+            size_hint_y: 0.05
 
-        # 4. BUTTONS
+        # 4. RESPONSIVE BUTTONS CONTAINER
         BoxLayout:
             orientation: 'vertical'
-            spacing: dp(35) # Space between the buttons
-            size_hint_y: None
+            spacing: dp(20)
+            size_hint: (0.8, None)  # Buttons take up 80% of screen width
             height: self.minimum_height
+            pos_hint: {'center_x': 0.5}
 
             GoldButton:
-                text: 'Play a Game'
+                text: 'PLAY A GAME'
+                size_hint_y: None
+                height: dp(80)
                 on_release: app.change_screen("choose_game")
             GoldButton:
-                text: 'Stats'
+                text: 'STATS'
+                text_color: app.text_color2
+                size_hint_y: None
+                height: dp(80)
                 on_release: app.change_screen("stats_screen")
             GoldButton:
-                text: 'Settings'
+                text: 'SETTINGS'
+                text_color: app.text_color2
+                size_hint_y: None
+                height: dp(80)
                 on_release: app.change_screen("settings_screen")
 
-          # 3. BOTTOM SPACER (Pushes footer down)
+        # 5. BOTTOM SPACER (Pushes footer down gracefully)
         Widget:
-            size_hint_y: None
-            height: dp(130)
+            size_hint_y: 0.15
 
-        #footer container with version number
+        # 6. FOOTER CONTAINER
         BoxLayout:
             orientation: 'vertical'
-            height: self.minimum_height
+            size_hint_y: None
+            height: dp(30)
             Label:
                 text: "v 1.0.0 Kivy Framework"
-                font_size: 35
+                font_size: '14sp'
                 color: (0.5, 0.5, 0.5, 1)
-
-
-        # 5. BOTTOM SAFE AREA (Fills remaining space to push everything up slightly)
-        Widget:
-            size_hint_y: .5
+                halign: 'center'
+                valign: 'middle'
+                text_size: self.size

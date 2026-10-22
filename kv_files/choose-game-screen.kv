@@ -8,50 +8,53 @@
         Rectangle:
             size: self.size
             pos: self.pos
-    #main container for image buttons and screen spacing
+
+    # Main layout using a flexible vertical structure with padding
     BoxLayout:
         orientation: 'vertical'
+        padding: [dp(24), dp(30), dp(24), dp(30)]
+        spacing: dp(15)
 
-        # 1. TOP SAFE AREA (Notch padding)
+        # 1. TOP SAFE AREA (Flexible spacer for notches/status bars)
         Widget:
-            size_hint_y: None
-            height: dp(110)
+            size_hint_y: 0.1
 
+        # 2. TITLE SECTION (Properly centered)
+        Label:
+            text: "GAME TYPE:"
+            font_size: '30sp'
+            bold: True
+            color: utils.get_color_from_hex(app.text_color2)
+            size_hint: (1, None)
+            height: dp(40)
+            halign: 'center'
+            valign: 'middle'
+            text_size: self.size
+
+        # Spacer between title and buttons
+        Widget:
+            size_hint_y: 0.05
+
+        # 3. BUTTONS CONTAINER (Centered elements with responsive spacing)
         BoxLayout:
             orientation: 'vertical'
-            spacing: dp(35) # Space between the buttons
-            size_hint_y: None
+            spacing: dp(35)
+            size_hint: (1, None)
             height: self.minimum_height
+            pos_hint: {'center_x': 0.5}
 
-            Label:
-                pos_hint: {"top": .9, "left": 1}
-                size_hint: 1, .1
-                text: "Game Type:"
-                font_size: dp(25)
-                color: utils.get_color_from_hex(app.accent_color)
-
-            Widget:
-                size_hint_y: None
-                height: dp(75)
-
-            #8Ball button
+            # 8-Ball Button (Smaller touch area, larger overlapping image)
             Button:
                 background_color: 0, 0, 0, 0
                 background_normal: ''
-
-                # 2. The suppressed tap animation
                 opacity: 0.6 if self.state == 'down' else 1.0
                 on_release: app.get_game_type("8 Ball")
 
-
-                # Sizing (Fixed size so they look uniform)
-                size_hint: None, None
-
-               #width/height
-                size: dp(142), dp(145)
+                size_hint: (None, None)
+                width: dp(120)   # Smaller touch bounding box width
+                height: dp(120)  # Smaller touch bounding box height
                 pos_hint: {'center_x': 0.5}
 
-                # set bg color
                 canvas.before:
                     Color:
                         rgba: utils.get_color_from_hex(app.main_color)
@@ -60,32 +63,22 @@
                     source: 'images/8Ball.png'
                     allow_stretch: True
                     keep_ratio: True
-                    #width/height
-                    size: dp(200), dp(200)  # Adjust to fit your button
-                    # This keeps the image centered in the button automatically
+                    size: (dp(170), dp(170))  # Larger image size that extends past touch area
                     center_x: self.parent.center_x
                     center_y: self.parent.center_y
 
-            Widget:
-                size_hint_y: None
-                height: dp(5)
-
-            #9Ball button
+            # 9-Ball Button (Smaller touch area, larger overlapping image)
             Button:
                 background_color: 0, 0, 0, 0
                 background_normal: ''
-
-                # 2. The suppressed tap animation
                 opacity: 0.6 if self.state == 'down' else 1.0
                 on_release: app.get_game_type("9 Ball")
 
-                # Sizing (Fixed size so they look uniform)
-                size_hint: None, None
-                 #width/height
-                size: dp(142), dp(145)
+                size_hint: (None, None)
+                width: dp(120)   # Smaller touch bounding box width
+                height: dp(120)  # Smaller touch bounding box height
                 pos_hint: {'center_x': 0.5}
 
-                # set bg color
                 canvas.before:
                     Color:
                         rgba: utils.get_color_from_hex(app.main_color)
@@ -94,59 +87,46 @@
                     source: 'images/9Ball.png'
                     allow_stretch: True
                     keep_ratio: True
-                     #width/height
-                    size: dp(200), dp(200)  # Adjust to fit your button
-                    # This keeps the image centered in the button automatically
+                    size: (dp(170), dp(170))  # Larger image size that extends past touch area
                     center_x: self.parent.center_x
                     center_y: self.parent.center_y
 
-            #button spacer
-            Widget:
-                size_hint_y: None
-                height: dp(50)
-
-            #back to homescreen button
-            Button:
-                text: "Back"
-                on_release: app.change_screen("home_screen", 'right')
-                # Remove the default Kivy grey button background
-                background_color: 0, 0, 0, 0
-                background_normal: ''
-
-                # 2. The suppressed tap animation
-                opacity: 0.6 if self.state == 'down' else 1.0
-
-                # Text styling (Dark blue text to match the app background)
-                color: utils.get_color_from_hex(app.main_color)
-                bold: True
-                font_size: '22sp'
-                font_name: "fonts/Avenir Next.ttc"
-
-                # Sizing (Fixed size so they look uniform)
-                size_hint: None, None
-
-                #width/height
-                size: dp(160), dp(60)
-                pos_hint: {'center_x': 0.5}
-
-                # Drawing the rounded rectangle and border
-                canvas.before:
-                    Color:
-                        rgba: utils.get_color_from_hex(app.accent_color)
-                    RoundedRectangle:
-                        size: self.size
-                        pos: self.pos
-                        radius: [dp(15)] # The curve of the corners
-
-                    # Optional: Adds the thin light border seen in your mockup
-                    Color:
-                        rgba: 1, 1, 1, 0.6
-                    Line:
-                        width: dp(1.0)
-                        rounded_rectangle: (self.x, self.y, self.width, self.height, dp(15))
-
-
-
-        # 5. BOTTOM SAFE AREA (Fills remaining space to push everything up slightly)
+        # Spacer between buttons and back button
         Widget:
-            size_hint_y: .4
+            size_hint_y: 0.1
+
+       # 4. BACK BUTTON (Fixed dimensions to prevent stretching in fullscreen)
+        Button:
+            text: "BACK"
+            on_release: app.change_screen("home_screen", 'right')
+            background_color: 0, 0, 0, 0
+            background_normal: ''
+            opacity: 0.6 if self.state == 'down' else 1.0
+
+            color: utils.get_color_from_hex(app.text_color2)
+            bold: True
+            font_size: '30sp'
+            font_name: "fonts/Avenir Next.ttc"
+
+            # Enforce strict dimensions across window resizing
+            size_hint: None, None
+            width: dp(160)
+            height: dp(50)
+            pos_hint: {'center_x': 0.5}
+
+            canvas.before:
+                Color:
+                    rgba: utils.get_color_from_hex(app.charcoal_2)
+                RoundedRectangle:
+                    size: self.size
+                    pos: self.pos
+                    radius: [dp(15)]
+                Color:
+                    rgba: 1, 1, 1, 0.6
+                Line:
+                    width: dp(1.0)
+                    rounded_rectangle: (self.x, self.y, self.width, self.height, dp(15))
+
+        # 5. BOTTOM FLEXIBLE SPACE
+        Widget:
+            size_hint_y: 0.25

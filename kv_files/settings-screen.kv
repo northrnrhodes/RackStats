@@ -1,7 +1,6 @@
 #:import utils kivy.utils
 
 <SettingsScreen>
-    # Set the dark blue background for the entire screen
     canvas.before:
         Color:
             rgba: utils.get_color_from_hex(app.main_color)
@@ -21,7 +20,7 @@
             pos_hint: {"top": .9, "left": 1}
 
             text: 'Settings Coming Soon!'
-            color: utils.get_color_from_hex(app.accent_color)
+            color: utils.get_color_from_hex(app.text_color2)
             font_size: dp(25)
 
 
@@ -37,8 +36,8 @@
             # 2. The suppressed tap animation
             opacity: 0.6 if self.state == 'down' else 1.0
 
-            # Text styling (Dark blue text to match the app background)
-            color: utils.get_color_from_hex(app.main_color)
+            # Text styling
+            color: utils.get_color_from_hex(app.text_color2)
             bold: True
             font_size: '22sp'
             font_name: "fonts/Avenir Next.ttc"
@@ -51,7 +50,7 @@
             # Drawing the rounded rectangle and border
             canvas.before:
                 Color:
-                    rgba: utils.get_color_from_hex(app.accent_color)
+                    rgba: utils.get_color_from_hex(app.charcoal_2)
                 RoundedRectangle:
                     size: self.size
                     pos: self.pos
