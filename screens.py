@@ -40,6 +40,17 @@ class PlayerPopup(Popup):
             btn.popup = self  # Give the button a reference to this popup
             grid.add_widget(btn)
 
+    def check_both_players_ready(self):
+        """Helper to check if both player slots on the SetupScreen have names."""
+        app = App.get_running_app()
+        setup_screen = app.root.ids.setup_screen
+
+        p1_text = setup_screen.ids.p1_slot.name_label.text.strip()
+        p2_text = setup_screen.ids.p2_slot.name_label.text.strip()
+
+        # Explicitly update the boolean property
+        setup_screen.players_ready = bool(p1_text and p2_text)
+        print(f"Players Ready State: {setup_screen.players_ready}")  #
 
 
     def finalize_selection(self, selected_player_obj):
@@ -60,6 +71,8 @@ class PlayerPopup(Popup):
             # User clicked an existing player: copy their identity over
             target_slot.name = selected_player_obj.name
             target_slot.user_id = selected_player_obj.user_id
+
+        self.check_both_players_ready()
 
         self.dismiss()
 
@@ -447,6 +460,7 @@ class ClockWidget(BoxLayout):
 
 class SetupScreen(Screen):
     player_list = ListProperty([])
+    players_ready = BooleanProperty(False)
 
 
     def show_popup(self, slot_id):

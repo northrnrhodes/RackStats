@@ -1,7 +1,9 @@
 #:import utils kivy.utils
+#:import Animation kivy.animation.Animation
 
 # --- CUSTOM BUTTON DESIGN ---
 <GoldButton@Button>:
+    text_alpha: 1.0  # <--- Add this property for text-only fading
     btn_color: app.charcoal2 if (app and hasattr(app, 'app.charcoal2') and app.charcoal2) else '#1A2123'
     text_color: app.text_color1 if (app and hasattr(app, 'app.text_color1') and app.text_color1) else '#4CEB63'
     # Remove the default Kivy grey button background
@@ -13,7 +15,7 @@
     opacity: 0.6 if self.state == 'down' else 1.0
 
     # Text styling
-    color: utils.get_color_from_hex(self.text_color if (self.text_color and isinstance(self.text_color, str)) else '#4CEB63')
+    color: utils.get_color_from_hex(self.text_color if (self.text_color and isinstance(self.text_color, str)) else '#4CEB63')[:3] + [self.text_alpha]
     bold: True
     font_size: '30sp'
 
@@ -97,6 +99,10 @@
                 size_hint_y: None
                 height: dp(80)
                 on_release: app.change_screen("choose_game")
+                #adds the flicker animation
+                on_kv_post: anim = Animation(text_alpha=1.0, duration=2.2) + Animation(text_alpha=0.3, duration=0.05) + Animation(text_alpha=1.0, duration=0.06) + Animation(text_alpha=0.5, duration=0.04) + Animation(text_alpha=1.0, duration=1.2) + Animation(text_alpha=0.2, duration=0.08) + Animation(text_alpha=0.8, duration=0.04) + Animation(text_alpha=1.0, duration=0.05) + Animation(text_alpha=1.0, duration=3.0); anim.repeat = True; anim.start(self)
+
+
             GoldButton:
                 text: 'STATS'
                 text_color: app.text_color2

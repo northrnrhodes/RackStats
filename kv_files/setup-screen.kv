@@ -1,5 +1,6 @@
 #:import utils kivy.utils
 #:import StringProperty kivy.properties.StringProperty
+#:import Window kivy.core.window.Window
 
 
 # --- PLAYER SLOT COMPONENT ---
@@ -11,6 +12,7 @@
     orientation: 'vertical'
     size_hint_y: None
     height: dp(140) # Fixed height prevents collapsing
+    size_hint_x: 0.48
 
     # [left, top, right, bottom] padding
     # This creates equal "buffer" space around the group
@@ -35,7 +37,7 @@
     Label:
         id: player_name_lbl
         text: (app.player1.name if root.title == "Player 1" else app.player2.name) if (app.player1.name if root.title == "Player 1" else app.player2.name) else ""
-        font_size: '18sp'
+        font_size: '20sp'
         bold: True
         size_hint_y: None
         height: dp(30)
@@ -43,7 +45,7 @@
         text_size: self.size
         halign: 'center'
         valign: 'middle'
-        color: utils.get_color_from_hex('#FFFFFF') #player name appears in white
+        color: utils.get_color_from_hex(app.text_color1) #player name appears in green
 
     # Smaller Edit Button
     GoldButton:
@@ -67,6 +69,9 @@
             size: self.size
     BoxLayout:
         orientation: 'vertical'
+        size_hint_x: None
+        width: min(Window.width * 0.95, dp(420))
+        pos_hint: {'center_x': 0.5}
         padding: dp(20)
         spacing: dp(10)
 
@@ -76,7 +81,7 @@
             height: dp(20)
 
         Label:
-            text: "Setup Match"
+            text: "SETUP MATCH"
             size_hint_y: None
             height: dp(80)
             font_size: '32sp'
@@ -86,7 +91,7 @@
             size_hint_y: None
             height: dp(45)
             font_size: '24sp'
-            color: utils.get_color_from_hex(app.text_color2)
+            color: utils.get_color_from_hex(app.text_color1)
 
         # Main horizontal container
         BoxLayout:
@@ -102,7 +107,7 @@
             Label:
                 text: "vs"
                 size_hint_x: 0.2
-                font_size: '35sp'
+                font_size: '30sp'
                 color: utils.get_color_from_hex(app.text_color2)
 
             PlayerSlot:
@@ -114,7 +119,7 @@
             size_hint_y: None
             text: 'Shoots First'
             color: utils.get_color_from_hex(app.text_color2)
-            font_size: '20sp'
+            font_size: '16sp'
             pos_hint: {'center_x': 0.5, 'center_y':0.5}
             padding: 0, 10, 0, 10
 
@@ -138,10 +143,11 @@
             CustomToggle:
                 id: player2_breaks
                 text: 'Player 2'
+                side: 'right'
                 group: 'shoots_first'
                 on_press: root.validate_toggle(self)
 
-        # ADDED: Small spacer for the gap between Toggles and Start Match
+        #Small spacer for the gap between Toggles and Start Match
         Widget:
             size_hint_y: None
             height: dp(30)
@@ -153,32 +159,37 @@
             color: (1, 0, 0, 1)  # Red text for errors
             size_hint_y: None
             height: dp(30)
-            font_size: '14sp'
+            font_size: '16sp'
             halign: 'center'
             valign: 'middle'
 
         # 3. START MATCH Button (Below the player boxes)
         GoldButton:
             text: "START MATCH"
-            size_hint: 0.5, None
+            size_hint_x: 0.6
+            size_hint_y: None
             font_size: '26sp'
             height: dp(60)
             pos_hint: {'center_x': 0.5}
             on_release: root.start_match()
+            on_kv_post: anim = Animation(text_alpha=1.0, duration=2.2) + Animation(text_alpha=0.3, duration=0.05) + Animation(text_alpha=1.0, duration=0.06) + Animation(text_alpha=0.5, duration=0.04) + Animation(text_alpha=1.0, duration=1.2) + Animation(text_alpha=0.2, duration=0.08) + Animation(text_alpha=0.8, duration=0.04) + Animation(text_alpha=1.0, duration=0.05) + Animation(text_alpha=1.0, duration=3.0); anim.repeat = True; root.bind(players_ready=lambda inst, val: anim.start(self) if val else anim.stop(self)); anim.start(self) if root.players_ready else None
+
 
 
         Widget: # Pushes everything to the top
             size_hint_y: 1.0
 
         GoldButton:
-            text: "Back"
-            size: dp(160), dp(60)
+            text: "BACK"
+            size_hint_x: 0.5
+            size_hint_y: None
+            height: dp(50)
+            font_size: '30sp'
             text_color: app.text_color2
-            size_hint: None, None
-            size: dp(160), dp(60)
+            pos_hint: {'center_x': 0.5}
             on_release: app.change_screen('choose_game', 'right')
 
-        # ADDED: This provides the bottom safe area padding
+        # This provides the bottom safe area padding
         Widget:
             size_hint_y: None
             height: dp(30) # This is your custom bottom safe area buffer
@@ -244,17 +255,40 @@
     size_hint: None, None
     height: dp(25)
     width:  dp(75)
+    side: 'left'
+
 
     # Remove the default Kivy grey button background
-    background_color: (1,1,1,1) if self.state == 'down' else app.text_color2
+    background_color: 0, 0, 0, 0
     background_down: ''
     background_normal: ''
+
+    canvas.before:
+        Color:
+            rgba: (1, 1, 1, 0.2) if self.state == 'down' else (0, 0, 0, 0)
+        RoundedRectangle:
+            size: self.size
+            pos: self.pos
+            radius: [dp(10), 0, 0, dp(10)] if self.side == 'left' else [0, dp(10), dp(10), 0]
+
+
+
+       #Dynamic border color (Bright amber when active, subtle faint white/grey when inactive)
+        Color:
+            rgba: utils.get_color_from_hex(app.text_color2) if self.state == 'down' else (1, 1, 1, 0.15)
+
+        # Dynamic border width (Slightly thicker when active to make it pop)
+        Line:
+            width: dp(2.0) if self.state == 'down' else dp(1.0)
+            rounded_rectangle:
+                (self.x, self.y, self.width, self.height, dp(10), 0, 0, dp(10)) if self.side == 'left' \
+                else (self.x, self.y, self.width, self.height, 0, dp(10), dp(10), 0)
 
     # 2. The suppressed tap animation
     opacity: 0.6 if self.state == 'down' else 1.0
 
     # Text styling (Dark blue text to match the app background)
-    color: utils.get_color_from_hex(app.main_color)
+    color: utils.get_color_from_hex('#4CEB63') if self.state == 'down' else utils.get_color_from_hex(app.text_color2)
     bold: True
-    font_size: '14sp'
+    font_size: '16sp'
 
