@@ -78,7 +78,7 @@
     Label:
         text: root.player_name
         font_size: '30sp'
-        color: utils.get_color_from_hex(app.text_color2)
+        color: utils.get_color_from_hex(app.text_color1) if root.is_active else utils.get_color_from_hex(app.text_color2)
         text_size: (self.width, self.height) # Forces the label to fill the box
         halign: 'center'
         valign: 'top' # Pins text to the top
@@ -135,6 +135,9 @@
 
     BoxLayout:
         orientation: 'vertical'
+        size_hint_x: None
+        width: min(Window.width * 0.95, dp(420))
+        pos_hint: {'center_x': 0.5}
 
         # 1. TOP SAFE AREA (Notch padding)
         Widget:
@@ -203,8 +206,9 @@
             spacing: dp(20)
 
             GoldButton:
-                text: f"{app.current_player.name if app.current_player and app.current_player.name else 'Player'} 's turn over"
+                text: f"{app.current_player.name if app.current_player and app.current_player.name else 'Player'}'s turn over"
                 font_size: '20sp'
+
                 size_hint: (.5, .05)
                 on_release: root.change_player()
 
@@ -223,6 +227,7 @@
 
             GoldButton:
                 text: 'Previous turn'
+                color: utils.get_color_from_hex(app.text_color2)
                 size_hint: (.5, .05)
                 font_size: '20sp'
                 disabled: app.rack_turn_count == 0
@@ -254,7 +259,7 @@
     background_normal: ''
 
     # Text styling (Dark blue text to match the app background)
-    color: utils.get_color_from_hex(app.main_color)
+    color: utils.get_color_from_hex(app.text_color2)
     bold: True
     font_size: '22sp'
 
@@ -266,7 +271,7 @@
     # Drawing the rounded rectangle and border
     canvas.before:
         Color:
-            rgba: utils.get_color_from_hex(app.text_color2) if self.state == "normal" else (1,1,1,1)
+            rgba: utils.get_color_from_hex(app.charcoal_2) if self.state == "normal" else (1,1,1,1)
         RoundedRectangle:
             size: self.size
             pos: self.pos
@@ -672,7 +677,7 @@
 
     Label:
         text: root.game_type
-        color: utils.get_color_from_hex(app.text_color2)
+        color: utils.get_color_from_hex(app.text_color1)
         size_hint_x: 0.5
         font_size: '18sp'
         bold: True
@@ -694,27 +699,47 @@
 #main menu quit game popup
 
 <ExitGamePopup>
-    size_hint: (0.5, 0.2)
-    title: "Are you sure you want to exit? All current progress will be lost."
-
-    separator_height: 0  # Hide Kivy's default top separator line
-    # Pushes the popup higher on the screen
+    size_hint: (0.85, None)
+    height: dp(200)
+    size_hint_min_x: dp(260)
+    size_hint_max_x: dp(320)
+    title: ''  # Hide default title
+    separator_height: 0
     pos_hint: {'center_x': 0.5, 'top': 0.9}
     auto_dismiss: False
+
     BoxLayout:
-        orientation: 'horizontal'
-        padding: 10, 0, 10, 0
-        spacing: dp(10)
+        orientation: 'vertical'
+        padding: [dp(15), dp(15), dp(15), dp(15)]
+        spacing: dp(35)
+        # Custom Label gives you full control over the orange text and wrapping!
+        Label:
+            text: "Are you sure you want to exit?\nAll current progress will be lost."
+            color: utils.get_color_from_hex(app.text_color2)
+            font_size: '16sp'
+            halign: 'center'
+            valign: 'middle'
+            text_size: self.size
 
-        GoldButton:
-            text: 'Yes'
-            size_hint: .2, .2
+        BoxLayout:
+            orientation: 'horizontal'
+            size_hint_y: None
+            height: dp(40)
+            spacing: dp(15)
+            padding: [dp(10), 0, dp(10), 0]
 
-            on_release: root.quit_game()
+            GoldButton:
+                text: 'Yes'
+                size_hint: (1, None)
+                height: dp(40)
+                font_size: '16sp'
+                pos_hint: {'center_y': 0.5}
+                on_release: root.quit_game()
 
-
-        GoldButton:
-            text: 'No'
-            size_hint: .2, .2
-            on_release: root.close()
-
+            GoldButton:
+                text: 'No'
+                size_hint: (1, None)
+                height: dp(40)
+                font_size: '16sp'
+                pos_hint: {'center_y': 0.5}
+                on_release: root.close()

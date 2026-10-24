@@ -601,17 +601,18 @@ class MatchScreen8(Screen):
         turn_player = last_turn.get('player')  # The player who made this specific turn
 
         if last_turn.get('played_safe') == True:
-            # 1. Revert lifetime object attribute
-            turn_player.total_safeties -= 1
-
             # 2. Revert the temporary UI app variable displayed on screen
-            if turn_player == app.player1:
+            if turn_player == app.player1.name:
                 app.p1_safe -= 1
             else:
                 app.p2_safe -= 1
 
+
         # --- Revert current_player object reference directly ---
         app.current_player = app.player2 if app.current_player == app.player1 else app.player1
+
+
+
 
         #remove the last entry in the turn data list, updates when next player button is pressed
         app.turn_data.pop()
