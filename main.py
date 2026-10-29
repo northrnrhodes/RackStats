@@ -4,6 +4,7 @@ from kivy.clock import Clock
 import utils
 from screens import *
 from screens import ExitGamePopup
+from screens import ResumeMatch
 from kivy.core.window import Window
 from kivy.properties import ListProperty, StringProperty, NumericProperty, BooleanProperty, ObjectProperty, DictProperty
 from data import *
@@ -27,11 +28,14 @@ class BilliardsScorekeeping(App):
     #global app variables
     game_type = StringProperty('')
 
-    match_ended = BooleanProperty(False)
+
     save_data = ObjectProperty(SaveData())
     match_id = StringProperty('')
     match_in_progress = BooleanProperty(False)
     active_match_data = DictProperty({})
+    match_started = BooleanProperty(False)
+    game_active = BooleanProperty(False)
+
     total_rack_seconds = NumericProperty(0)
 
     #player and game variables
@@ -68,6 +72,7 @@ class BilliardsScorekeeping(App):
 
     main_color = StringProperty('#121718') #charcoal grey main canvas
     charcoal_2 = StringProperty('#1A2123')#button/card fills
+    popup_bg = StringProperty('#5A5A5A')
     # grey_green = StringProperty('#3A5A48') #secondary grey/green
     text_color1 = StringProperty('#4CEB63') #mint green for text
     text_color2 = StringProperty('#FF9F43') #amber/neon orange for text and border highlights
@@ -75,41 +80,30 @@ class BilliardsScorekeeping(App):
 
     def on_start(self):
         Clock.schedule_once(self.switch_to_menu, 2.0)
+        # setup_screen = self.root.get_screen('setup_screen')
+        # print(setup_screen)
 
 
     def switch_to_menu(self, dt):
-        self.root.ids['screen_manager'].transition.duration = 1.0
-        self.root.ids['screen_manager'].current = 'home_screen'
+        self.root.transition.duration = 1.0
+        self.root.current = 'home_screen'
 
     #builds the UI and loads user data
     def build(self):
         GUI = Builder.load_file('main.kv')
         loaded_data = SaveData.load(self.user_data_dir)
 
+
         # 2. Safely update the property
         if isinstance(loaded_data, dict):
             self.game_data.update(loaded_data)
         print(self.game_data)
 
-        # <--- Check match history for any unsubmitted/unfinished match after a crash or exit --->
-        unfinished_match = SaveData.get_unfinished_match(self.user_data_dir)
 
-        if unfinished_match:
-            self.match_in_progress = True
-            self.match_id = unfinished_match.get("match_id", "")
-            self.active_match_data = unfinished_match
-            self.game_type = unfinished_match.get("game_type", "")
-            print(f"Unfinished match detected! Recovering match ID: {self.match_id}")
-
-        # TODO: Add your logic here to unpack `unfinished_match` back into your
-        # TODO RAM variables (e.g., racks, innings, players, timers) if you want them restored.
-        else:
-            self.match_in_progress = False
-            print("No unfinished matches found. Starting fresh.")
 
         # --- LOAD SAVED PLAYERS INTO SETUP SCREEN ---
         # Find the setup screen via screen manager and populate its player_list
-        setup_screen = GUI.ids.screen_manager.get_screen('setup_screen')
+        setup_screen = GUI.get_screen('setup_screen')
         loaded_players = SaveData.load_players(self.user_data_dir, Player)
         if loaded_players:
             setup_screen.player_list = loaded_players
@@ -117,17 +111,35 @@ class BilliardsScorekeeping(App):
         return GUI
 
     def change_screen(self, screen_name, direction='left'):
-        screen_manager = self.root.ids['screen_manager']
+        screen_manager = self.root
         screen_manager.transition.duration = .25
         screen_manager.transition.direction = direction
         screen_manager.current = screen_name
         # screen = self.root.ids.game_setup_screen
 
 
+    def check_unfinished_match(self):
+        # <--- Check match history for any unsubmitted/unfinished match after a crash or exit --->
+        unfinished_match = SaveData.get_unfinished_match(self.user_data_dir)
+
+        if unfinished_match:
+            print(f"Unfinished match detected! Recovering match ID: {self.match_id}")
+            # Trigger the custom modal code defined above
+            popup = ResumeMatch(unfinished_match=unfinished_match)
+            popup.open()
+
+
+        else:
+            self.match_in_progress = False
+            self.match_started = False
+            print("No unfinished matches found. Starting fresh.")
+            self.change_screen('setup_screen')
+
     #retrieves game type and passes it to setup screen
     def get_game_type(self, game):
         self.game_type = game
-        self.change_screen('setup_screen')
+        if self.match_in_progress == True:
+            self.change_screen('setup_screen')
         print(self.game_type)
 
 
@@ -151,7 +163,7 @@ class BilliardsScorekeeping(App):
         seconds = self.seconds_passed % 60
         self.timer_text = f'{minutes:02}:{seconds:02}'
 
-        if self.match_started == True:
+        if self.match_in_progress == True:
             self.match_seconds += 1
             mm, ss = divmod(self.match_seconds, 60)
             self.match_time = f"{mm:02}:{ss:02}"
@@ -162,13 +174,6 @@ class BilliardsScorekeeping(App):
         popup = ExitGamePopup()
         popup.open()
 
-    def get_game_state(self):
-        if self.match_started == True:
-            print("There was a current game in progress. Would you like to continue?")
-        else:
-            self.match_started = False
-            self.change_screen('setup_screen')
-
 
 
     def reset_game_state(self):
@@ -177,7 +182,7 @@ class BilliardsScorekeeping(App):
             self.stop_timer()
         self.match_seconds = 0
         self.match_time = '00:00'
-        self.match_started = False
+        self.match_in_progress = False
         self.is_running = False
         self.seconds_passed = 0
         self.timer_text = '00:00'
@@ -188,8 +193,6 @@ class BilliardsScorekeeping(App):
         # Reset turn data and innings
         self.turn_data = []
         self.innings = 0
-
-
 
         # Reset player stats if they exist
         self.current_player = None
@@ -203,29 +206,25 @@ class BilliardsScorekeeping(App):
             self.p1_safeties = 0
             self.player1.wins = 0
             self.player1.safeties = 0
+            self.player1 = Player()
 
         if self.player2:
             self.p2_wins = 0
             self.p2_safeties = 0
             self.player2.wins = 0
             self.player2.safeties = 0
-
-        print(self.player1.wins)
-        print(self.player1.safeties)
-        print(self.player2.wins)
-        print(self.player2.safeties)
-
+            self.player2 = Player()
 
 
     def record_turn_time(self):
-        # --- ADDED: Method to save and reset timer ---
+        # --- Method to save and reset timer ---
         self.turn_data.append({'player': self.current_player.name, 'turn_time': self.seconds_passed, 'played_safe': self.played_safe})
         if self.played_safe:
             self.played_safe = False
         self.seconds_passed = 0
         self.timer_text = '00:00'
 
-        print(f'Match has started: {self.match_started}')
+        print(f'Match has started: {self.match_in_progress}')
         for turn in self.turn_data:
             print(turn)
 

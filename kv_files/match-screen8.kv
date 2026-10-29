@@ -158,7 +158,8 @@
             padding: (25, 0, 25, 0)
 
             PlayerBox:
-                player_name: app.player1.name if app.player1 else "Player 1"
+                id: p1_box
+                player_name: app.player1.name if app.player1 else ""
                 defensive_count: app.p1_safe
                 wins_count: app.p1_wins
                 is_active: app.current_player == app.player1
@@ -171,7 +172,8 @@
                 color: utils.get_color_from_hex(app.text_color2)
 
             PlayerBox:
-                player_name: app.player2.name if app.player2 else "Player 2"
+                id: p2_box
+                player_name: app.player2.name if app.player2 else ""
                 defensive_count: app.p2_safe
                 wins_count: app.p2_wins
                 is_active: app.current_player == app.player2
@@ -540,8 +542,40 @@
 
 
         Widget:
-            size_hint_y: 0.1
+            size_hint_y: 0.05
+        Label:
+            pos_hint: {'center_x': 0.5}
+            text: 'Play again?'
+            size_hint_y: None
+            font_size: '15sp'
+            color: utils.get_color_from_hex(app.text_color2)
+            bold: True
 
+        #Toggle switch container
+        BoxLayout:
+            orientation: 'horizontal'
+            size_hint_x: None
+            width: dp(150)
+            pos_hint: {'center_x': 0.5}
+            size_hint_y: None
+            height: dp(30)
+
+            CustomToggle:
+                id: yes
+                text: 'YES'
+                group: 'play_again'
+                state: 'down'
+                on_press: root.validate_toggle(self)
+
+            CustomToggle:
+                id: no
+                text: 'NO'
+                side: 'right'
+                group: 'play_again'
+                on_press: root.validate_toggle(self)
+
+        Widget:
+            size_hint_y: 0.05
 
         GoldButton:
             text: 'Submit'
@@ -553,23 +587,28 @@
 
 #define 8 Ball break or Break and run popup
 <BreakGameEnd>
-    size_hint: (0.8, 0.5)
+    size_hint: (0.85, 0.90)
+
+    #minimum constraints for responsiveness
+    size_hint_min_x: dp(300)
+    size_hint_max_x: dp(450)
     title: ""
 
     separator_height: 0  # Hide Kivy's default top separator line
     # Pushes the popup higher on the screen
-    pos_hint: {'center_x': 0.5, 'top': 0.9}
+    pos_hint: {'center_x': 0.5, 'top': 0.95}
     auto_dismiss: False
 
     BoxLayout:
         orientation: 'vertical'
-        padding: dp(20)
-        spacing: dp(15)
+        padding: dp(15)
+        spacing: dp(10)
 
         #custom title label with "X" button
         BoxLayout:
             size_hint_y: None
-            height: dp(30)
+            height: dp(40)
+            padding: [0, dp(2), 0, dp(2)]
 
             Label:
                 text: "What happened?"
@@ -581,8 +620,10 @@
             Button:
                 text: "X"
                 size_hint: (None, None)
-                size: dp(30), dp(30)
+                height: self.parent.height * 0.5
+                width: self.height
                 font_size: '14sp'
+                pos_hint: {'center_y': 0.5}
                 background_normal: ''
                 background_color: (0.8, 0.2, 0.2, 1)
                 on_release: root.dismiss()
@@ -598,40 +639,85 @@
                     pos: self.pos
                     size: self.size
 
+        BoxLayout:
+            orientation: 'vertical'
+            size_hint_y: 0.88
+            spacing: dp(8)
+            padding: [dp(5), dp(5), dp(5), dp(5)]
+             # error label
+            Label:
+                id: error_label
+                text: ""
+                color: 1, 0, 0, 1 # Red text
+                font_size: '14sp'
+                size_hint_y: 0.05
 
-         # New error label
+
+            SafetyToggle:
+                group: 'game_over'
+                id: eight_ball_break
+                text: '8 Ball break'
+                size_hint: (.8, .10)
+                pos_hint: {'center_x': 0.5}
+                font_size: '15sp'
+
+
+            SafetyToggle:
+                group: 'game_over'
+                id: break_and_run
+                text: 'Break and Run'
+                size_hint: (.8, .10)
+                pos_hint: {'center_x': 0.5}
+                font_size: '15sp'
+
+
+            SafetyToggle:
+                group: 'game_over'
+                id: scratched
+                text: '8 Ball break & Scratch'
+                size_hint: (.8, .10)
+                pos_hint: {'center_x': 0.5}
+                font_size: '15sp'
+
+
+            Widget:
+                size_hint_y: 0.45
+
+        Widget:
+            size_hint_y: 0.05
+
+
         Label:
-            id: error_label
-            text: ""
-            color: 1, 0, 0, 1 # Red text
-            font_size: '14sp'
+            pos_hint: {'center_x': 0.5}
+            text: 'Play again?'
+            size_hint_y: None
+            font_size: '15sp'
+            color: utils.get_color_from_hex(app.text_color2)
+            bold: True
+
+        #Toggle switch container
+        BoxLayout:
+            orientation: 'horizontal'
+            size_hint_x: None
+            width: dp(150)
+            pos_hint: {'center_x': 0.5}
             size_hint_y: None
             height: dp(30)
 
+            CustomToggle:
+                id: yes
+                text: 'YES'
+                group: 'play_again'
+                state: 'down'
+                on_press: root.validate_toggle(self)
 
+            CustomToggle:
+                id: no
+                text: 'NO'
+                side: 'right'
+                group: 'play_again'
+                on_press: root.validate_toggle(self)
 
-        SafetyToggle:
-            group: 'game_over'
-            id: eight_ball_break
-            text: '8 Ball break'
-            size_hint: (.5, .05)
-            font_size: '15sp'
-
-
-        SafetyToggle:
-            group: 'game_over'
-            id: break_and_run
-            text: 'Break and Run'
-            size_hint: (.5, .05)
-            font_size: '15sp'
-
-
-        SafetyToggle:
-            group: 'game_over'
-            id: scratched
-            text: 'Made 8 ball but scratched'
-            size_hint: (.5, .05)
-            font_size: '15sp'
 
 
         Widget:
@@ -640,8 +726,9 @@
 
         GoldButton:
             text: 'Submit'
-            size_hint: (.5, .05)
-            font_size: '15sp'
+            size_hint: (.5, .1)
+            pos_hint: {'center_x': 0.5}
+            font_size: '30sp'
             on_release: root.get_game_results()
 
 
@@ -743,3 +830,172 @@
                 font_size: '16sp'
                 pos_hint: {'center_y': 0.5}
                 on_release: root.close()
+
+
+
+<GameEndSummary>
+    size_hint: (0.85, 0.90)
+
+    #minimum constraints for responsiveness
+    size_hint_min_x: dp(300)
+    size_hint_max_x: dp(450)
+    title: ""
+
+    separator_height: 0  # Hide Kivy's default top separator line
+    # Pushes the popup higher on the screen
+    pos_hint: {'center_x': 0.5, 'top': 0.95}
+    auto_dismiss: False
+
+    #hide kivys default window fill
+    background_color: 0, 0, 0, 0
+    background: ''
+
+    canvas.before:
+        # --- CUSTOM ROUNDED BACKGROUND ---
+        Color:
+            # Match your background theme color (adjust hex code as needed)
+            rgba: utils.get_color_from_hex(app.popup_bg)
+        RoundedRectangle:
+            pos: self.pos
+            size: self.size
+            radius: [dp(20)]  # Adjust corner roundness here (e.g., 20dp)
+
+
+    BoxLayout:
+        orientation: 'vertical'
+        padding: dp(15)
+        spacing: dp(10)
+
+        #custom title label
+        BoxLayout:
+            size_hint_y: None
+            height: dp(40)
+            padding: [0, dp(2), 0, dp(2)]
+
+            Label:
+                text: "MATCH SUMMARY"
+                font_size: '30sp'
+                color: utils.get_color_from_hex(app.text_color1)
+                bold: True
+                halign: 'center'
+                valign: 'middle'
+
+        # --- Custom Separator Line below the header ---
+        Widget:
+            size_hint_y: None
+            height: dp(2)
+            canvas:
+                Color:
+                    rgba: utils.get_color_from_hex(app.text_color2)
+                Rectangle:
+                    pos: self.pos
+                    size: self.size
+
+        Widget:
+            size_hint_y: .05
+
+
+        BoxLayout:
+            orientation: 'horizontal'
+            spacing: dp(5)
+
+            Label:
+                text: app.player1.name
+
+            Label:
+                text: str(app.p1_wins)
+
+        BoxLayout:
+            orientation: 'horizontal'
+            spacing: dp(5)
+
+            Label:
+                text: app.player2.name
+
+            Label:
+                text: str(app.p2_wins)
+
+        Widget:
+            size_hint_y: 1
+
+
+
+        BoxLayout:
+            orientation: 'vertical'
+            size_hint_y: None
+
+            GoldButton:
+                text: 'Return to Menu'
+                size_hint: (1, None)
+                text_color: utils.get_color_from_hex(app.text_color1)
+                height: dp(40)
+                font_size: '16sp'
+                pos_hint: {'center_x': 0.5}
+                on_release: root.quit_game()
+
+
+<ResumeMatch>:
+    size_hint: 0.6, 0.2
+
+    #minimum constraints for responsiveness
+    size_hint_min_x: dp(300)
+    size_hint_max_x: dp(450)
+
+    separator_height: 0  # Hide Kivy's default top separator line
+
+    # Pushes the popup higher on the screen
+    pos_hint: {'center_x': 0.5, 'center_y': 0.65}
+    auto_dismiss: False
+    title: ""
+
+    BoxLayout:
+        orientation: 'vertical'
+        padding: dp(10)
+        spacing: dp(15)
+
+        Label:
+            text: "You have an unfinished match in session.\nWould you like to resume?"
+            color: utils.get_color_from_hex(app.text_color2)
+            halign: 'center'
+            valign: 'middle'
+            size_hint_y: None
+            height: self.texture_size[1] # <--- Let label size itself dynamically to its text height
+
+         # --- Custom Separator Line below the header ---
+        Widget:
+            size_hint_y: None
+            height: dp(2)
+            canvas:
+                Color:
+                    rgba: utils.get_color_from_hex(app.text_color1)
+                Rectangle:
+                    pos: self.pos
+                    size: self.size
+
+
+        Widget:
+            size_hint_y: 1
+
+
+        BoxLayout:
+            size_hint_y: None
+            height: dp(50)
+            spacing: dp(20)
+
+            GoldButton:
+                text: "Resume"
+                text_color: app.text_color2
+                size_hint: (1, None)
+                height: dp(40)
+                font_size: '16sp'
+                pos_hint: {'center_y': 0.5}
+                on_release: root.resume_match()
+
+            GoldButton:
+                text: "Discard"
+                text_color: app.text_color2
+                size_hint: (1, None)
+                height: dp(40)
+                font_size: '16sp'
+                pos_hint: {'center_y': 0.5}
+                on_release: root.discard_match()

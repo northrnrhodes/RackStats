@@ -48,7 +48,7 @@
                 background_color: 0, 0, 0, 0
                 background_normal: ''
                 opacity: 0.6 if self.state == 'down' else 1.0
-                on_release: app.get_game_type("8 Ball")
+                on_release: app.get_game_type("8 Ball"); app.check_unfinished_match()
 
                 size_hint: (None, None)
                 width: dp(120)   # Smaller touch bounding box width
@@ -72,7 +72,7 @@
                 background_color: 0, 0, 0, 0
                 background_normal: ''
                 opacity: 0.6 if self.state == 'down' else 1.0
-                on_release: app.get_game_type("9 Ball")
+                on_release: app.get_game_type("9 Ball"); app.check_unfinished_match()
 
                 size_hint: (None, None)
                 width: dp(120)   # Smaller touch bounding box width

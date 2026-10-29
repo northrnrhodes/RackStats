@@ -36,7 +36,7 @@
 
     Label:
         id: player_name_lbl
-        text: (app.player1.name if root.title == "Player 1" else app.player2.name) if (app.player1.name if root.title == "Player 1" else app.player2.name) else ""
+        text: (app.player1.name if app.player1 and hasattr(app.player1, 'name') else "") if root.title == "Player 1" else (app.player2.name if app.player2 and hasattr(app.player2, 'name') else "")
         font_size: '20sp'
         bold: True
         size_hint_y: None

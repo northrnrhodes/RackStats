@@ -3,6 +3,7 @@ from kivy.properties import StringProperty, NumericProperty, ListProperty
 import json
 import os
 from kivy.app import App
+from datetime import datetime
 
 
 
@@ -15,7 +16,7 @@ class Player(EventDispatcher):
     wins = NumericProperty(0)
 
     #records balls made per rack, length of list is total games played
-    balls_history = ListProperty([])
+    balls_made = NumericProperty(0)
 
 
     def play_safety(self):
@@ -24,8 +25,9 @@ class Player(EventDispatcher):
     def add_win(self):
         self.wins += 1
 
-    def update_ball_history(self, balls_remaining):
-        self.balls_history.append(balls_remaining)
+    def update_balls_made(self, balls_remaining):
+        if balls_remaining is not None:
+            self.balls_made += (7 - balls_remaining)
 
 
 
@@ -60,14 +62,7 @@ class SaveData():
 
         return os.path.join(documents_dir, 'player_list.json')
 
-    # @staticmethod
-    # def get_game_state_path(user_data_dir):
-    #     '''retrieves directory for game state data. creates directory if it doesn't exist'''
-    #     if 'Library' in user_data_dir:
-    #         documents_dir = os.path.join(user_data_dir.split('Library')[0], 'Documents')
-    #     else:
-    #         documents_dir = user_data_dir
-    #     return os.path.join(documents_dir, 'active_game_state.json')
+
 
 
     @classmethod
@@ -125,6 +120,63 @@ class SaveData():
         except Exception as e:
             print(f'Failed to save players: {e}')
 
+    @classmethod
+    def initialize_new_match(cls, match_id, game_type, user_data_dir):
+        history_data = cls.load(user_data_dir)
+        today = datetime.now().strftime("%m-%d-%Y")
+
+        if today not in history_data:
+            history_data[today] = {}
+
+        history_data[today][match_id] = {
+            "match_id": match_id,
+            "match_in_progress": True,
+            "game_type": game_type,
+            "match_seconds": 0,  # <--- Track total match seconds here
+            "games": []
+        }
+        cls.save(history_data, user_data_dir)
+
+    @classmethod
+    def auto_save_match(cls, match_id, current_games_list, user_data_dir, match_in_progress=True, current_turns=None):
+        '''Updates active match games list, active rack turns, stats, and match status in real time'''
+        app = App.get_running_app()
+        history_data = cls.load(user_data_dir)
+
+        current_date = datetime.now().strftime("%m-%d-%Y")
+        if current_date not in history_data:
+            history_data[current_date] = {}
+
+        if match_id not in history_data[current_date]:
+            history_data[current_date][match_id] = {
+                "match_id": match_id,
+                "game_type": getattr(app, 'game_type', '8-Ball'),
+                "games": []
+            }
+
+        match_container = history_data[current_date][match_id]
+
+        # Update all live metrics directly from app state
+        match_container["games"] = current_games_list
+        match_container["match_in_progress"] = match_in_progress
+        match_container["player1_wins"] = getattr(app, 'p1_wins', 0)
+        match_container["player2_wins"] = getattr(app, 'p2_wins', 0)
+        match_container["player1_safes"] = getattr(app, 'p1_safe', 0)
+        match_container["player2_safes"] = getattr(app, 'p2_safe', 0)
+
+        # Force the exact live turns list into active_rack
+        if "active_rack" not in match_container:
+            match_container["active_rack"] = {}
+
+        if current_turns is not None:
+            match_container["active_rack"]["turns"] = list(current_turns)
+        else:
+            match_container["active_rack"]["turns"] = list(getattr(app, 'turn_data', []))
+
+        cls.save(history_data, user_data_dir)
+        print(f"Disk sync successful! Saved {len(match_container['active_rack']['turns'])} turns to disk.")
+
+
 
     @classmethod
     def get_unfinished_match(cls, user_data_dir):
@@ -139,7 +191,7 @@ class SaveData():
             for date_str, matches_dict in history_data.items():
                 if isinstance(matches_dict, dict):
                     for match_id, match in matches_dict.items():
-                        if isinstance(match, dict) and match.get("match_ended") is False:
+                        if isinstance(match, dict) and match.get("match_in_progress") is True:
                             match["match_date"] = date_str  # Attach the date for reference if needed
                             return match
 
