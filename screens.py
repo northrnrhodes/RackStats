@@ -164,7 +164,8 @@ class MatchScreen8(Screen):
         app.turns += 1
         app.rack_turn_count += 1
         app.innings = app.turns // 2
-        app.current_player.turns = +1
+        app.current_player.turns += 1
+        print(app.current_player.turns)
         # --- Switch current_player object reference directly ---
         app.current_player = app.player2 if app.current_player == app.player1 else app.player1
         if app.played_safe == True:
