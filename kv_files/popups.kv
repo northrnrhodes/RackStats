@@ -1,0 +1,120 @@
+#:import utils kivy.utils
+
+
+
+<ResumeMatch>:
+    size_hint: 0.6, 0.2
+
+    #minimum constraints for responsiveness
+    size_hint_min_x: dp(300)
+    size_hint_max_x: dp(450)
+
+    separator_height: 0  # Hide Kivy's default top separator line
+
+    # Pushes the popup higher on the screen
+    pos_hint: {'center_x': 0.5, 'center_y': 0.65}
+    auto_dismiss: False
+    title: ""
+
+    BoxLayout:
+        orientation: 'vertical'
+        padding: dp(10)
+        spacing: dp(15)
+
+        Label:
+            text: "You have an unfinished match in session.\nWould you like to resume?"
+            color: utils.get_color_from_hex(app.text_color2)
+            halign: 'center'
+            valign: 'middle'
+            size_hint_y: None
+            height: self.texture_size[1] # <--- Let label size itself dynamically to its text height
+
+         # --- Custom Separator Line below the header ---
+        Widget:
+            size_hint_y: None
+            height: dp(2)
+            canvas:
+                Color:
+                    rgba: utils.get_color_from_hex(app.text_color1)
+                Rectangle:
+                    pos: self.pos
+                    size: self.size
+
+
+        Widget:
+            size_hint_y: 1
+
+
+        BoxLayout:
+            size_hint_y: None
+            height: dp(50)
+            spacing: dp(20)
+
+            GoldButton:
+                text: "Resume"
+                text_color: app.text_color2
+                size_hint: (1, None)
+                height: dp(40)
+                font_size: '16sp'
+                pos_hint: {'center_y': 0.5}
+                on_release: root.resume_match()
+
+            GoldButton:
+                text: "Discard"
+                text_color: app.text_color2
+                size_hint: (1, None)
+                height: dp(40)
+                font_size: '16sp'
+                pos_hint: {'center_y': 0.5}
+                on_release: root.discard_match()
+
+
+
+
+#main menu quit game popup
+
+<ExitGamePopup>
+    size_hint: (0.85, None)
+    height: dp(200)
+    size_hint_min_x: dp(260)
+    size_hint_max_x: dp(320)
+    title: ''  # Hide default title
+    separator_height: 0
+    pos_hint: {'center_x': 0.5, 'top': 0.9}
+    auto_dismiss: False
+
+    BoxLayout:
+        orientation: 'vertical'
+        padding: [dp(15), dp(15), dp(15), dp(15)]
+        spacing: dp(35)
+        # Custom Label gives you full control over the orange text and wrapping!
+        Label:
+            text: "Are you sure you want to exit?\nAll current progress will be lost."
+            color: utils.get_color_from_hex(app.text_color2)
+            font_size: '16sp'
+            halign: 'center'
+            valign: 'middle'
+            text_size: self.size
+
+        BoxLayout:
+            orientation: 'horizontal'
+            size_hint_y: None
+            height: dp(40)
+            spacing: dp(15)
+            padding: [dp(10), 0, dp(10), 0]
+
+            GoldButton:
+                text: 'Yes'
+                size_hint: (1, None)
+                height: dp(40)
+                font_size: '16sp'
+                pos_hint: {'center_y': 0.5}
+                on_release: root.quit_game()
+
+            GoldButton:
+                text: 'No'
+                size_hint: (1, None)
+                height: dp(40)
+                font_size: '16sp'
+                pos_hint: {'center_y': 0.5}
+                on_release: root.close()

@@ -1,0 +1,302 @@
+#:import utils kivy.utils
+
+
+<GameEndSummary>
+    size_hint: (0.85, 0.90)
+
+    #minimum constraints for responsiveness
+    size_hint_min_x: dp(300)
+    size_hint_max_x: dp(450)
+    title: ""
+
+    separator_height: 0  # Hide Kivy's default top separator line
+    # Pushes the popup higher on the screen
+    pos_hint: {'center_x': 0.5, 'top': 0.95}
+    auto_dismiss: False
+
+    #hide kivys default window fill
+    background_color: 0, 0, 0, 0
+    background: ''
+
+    canvas.before:
+        # --- CUSTOM ROUNDED BACKGROUND for popup window---
+        Color:
+            # Match your background theme color (adjust hex code as needed)
+            rgba: utils.get_color_from_hex(app.popup_bg)
+        RoundedRectangle:
+            pos: self.pos
+            size: self.size
+            radius: [dp(20)]  # Adjust corner roundness here (e.g., 20dp)
+
+         # Adds thin green border around window
+        Color:
+            rgba: utils.get_color_from_hex(app.text_color1)
+        Line:
+            width: dp(1.0)
+            rounded_rectangle: (self.x, self.y, self.width, self.height, dp(15))
+
+
+    #main container layout
+    BoxLayout:
+        orientation: 'vertical'
+        padding: dp(15)
+        spacing: dp(10)
+
+        #custom title label
+        BoxLayout:
+            size_hint_y: None
+            height: dp(40)
+            padding: [0, dp(2), 0, dp(2)]
+
+            Label:
+                text: "MATCH SUMMARY"
+                font_size: '30sp'
+                color: utils.get_color_from_hex(app.text_color1)
+                bold: True
+                halign: 'center'
+                valign: 'middle'
+
+        # --- Custom Separator Line below the header ---
+        Widget:
+            size_hint_y: None
+            height: dp(2)
+            canvas:
+                Color:
+                    rgba: utils.get_color_from_hex(app.text_color2)
+                Rectangle:
+                    pos: self.pos
+                    size: self.size
+
+        #spacer widget
+        Widget:
+            size_hint_y: 1
+
+
+      # --- SECTION 1: match time/ total innings ---
+        BoxLayout:
+            orientation: 'vertical'
+            size_hint_y: None
+            height: dp(110)
+            canvas.before:
+                Color:
+                    rgba: utils.get_color_from_hex(app.charcoal_2) # Inner dark container
+                RoundedRectangle:
+                    pos: self.pos
+                    size: self.size
+                    radius: [dp(20)]
+
+
+
+            #header bar
+            BoxLayout:
+                size_hint_y: None
+                height: dp(35)
+                canvas.before:
+                    Color:
+                        rgba: utils.get_color_from_hex('#3A5A40') # Muted green accent header
+                    RoundedRectangle:
+                        pos: self.pos
+                        size: self.size
+                        radius: [dp(12), dp(12), 0, 0]
+
+
+                Label:
+                    text: 'MATCH TIME'
+                    bold: True
+                    font_size: '15sp'
+                    color: utils.get_color_from_hex(app.text_color2)
+                Label:
+                    text: 'TOTAL INNINGS'
+                    bold: True
+                    font_size: '15sp'
+                    color: utils.get_color_from_hex(app.text_color2)
+
+            # values row
+            BoxLayout:
+                orientation: 'horizontal'
+                Label:
+                    text: app.match_time
+                    font_size: '32sp'
+                    bold: True
+                    color: utils.get_color_from_hex(app.text_color1)
+                Label:
+                    text: str(app.innings)
+                    font_size: '32sp'
+                    bold: True
+                    color: utils.get_color_from_hex(app.text_color1)
+
+
+
+
+        # --- SECTION 2: PLAYER WINS/shooting % CARD ---
+        BoxLayout:
+            orientation: 'vertical'
+            size_hint_y: None
+            height: dp(220)
+            canvas.before:
+                Color:
+                    rgba: utils.get_color_from_hex(app.charcoal_2) # Inner dark container
+                RoundedRectangle:
+                    pos: self.pos
+                    size: self.size
+                    radius: [dp(20)]
+
+                         # Adds thin green border around window
+
+
+
+
+            # Player Names Header Bar
+            BoxLayout:
+                size_hint_y: None
+                height: dp(35)
+                canvas.before:
+                    Color:
+                        rgba: utils.get_color_from_hex('#3A5A40') # Muted green accent header
+                    RoundedRectangle:
+                        pos: self.pos
+                        size: self.size
+                        radius: [dp(20), dp(20), 0, 0]
+
+
+                Label:
+                    text: app.player1.name
+                    bold: True
+                    font_size: '15sp'
+                    color: utils.get_color_from_hex(app.text_color2)
+                Label:
+                    text: app.player2.name
+                    bold: True
+                    font_size: '15sp'
+                    color: utils.get_color_from_hex(app.text_color2)
+
+            # Scores Row
+            BoxLayout:
+                orientation: 'horizontal'
+                Label:
+                    text: str(app.p1_wins)
+                    font_size: '32sp'
+                    bold: True
+                    color: utils.get_color_from_hex(app.text_color1)
+                Label:
+                    text: str(app.p2_wins)
+                    font_size: '32sp'
+                    bold: True
+                    color: utils.get_color_from_hex(app.text_color1)
+
+
+                # --- Custom Separator Line below the header ---
+            Widget:
+                size_hint_y: None
+                height: dp(0.5)
+                size_hint_x: .8
+                pos_hint: {'center_x': 0.5}
+                canvas:
+                    Color:
+                        rgba: utils.get_color_from_hex(app.text_color2)
+                    Rectangle:
+                        pos: self.pos
+                        size: self.size
+
+
+            # shooting %
+            BoxLayout:
+                orientation: 'horizontal'
+                Label:
+                    text: 'Shooting %'
+                    font_size: '15sp'
+                    bold: True
+                    color: utils.get_color_from_hex(app.text_color2)
+                Label:
+                    text: 'Shooting %'
+                    font_size: '15sp'
+                    bold: True
+                    color: utils.get_color_from_hex(app.text_color2)
+
+            # shooting % values
+            BoxLayout:
+                orientation: 'horizontal'
+                Label:
+                    text: root.calculate_shooting_percentage(app.player1)
+                    font_size: '32sp'
+                    bold: True
+                    color: utils.get_color_from_hex(app.text_color1)
+                    valign: 'top'
+                    halign: 'center'
+                Label:
+                    text: root.calculate_shooting_percentage(app.player2)
+                    font_size: '32sp'
+                    bold: True
+                    color: utils.get_color_from_hex(app.text_color1)
+                    valign: 'top'
+                    halign: 'center'
+
+
+
+        # --- SECTION 3: total racks/avg innings per rack ---
+        BoxLayout:
+            orientation: 'vertical'
+            size_hint_y: None
+            height: dp(110)
+            canvas.before:
+                Color:
+                    rgba: utils.get_color_from_hex(app.charcoal_2) # Inner dark container
+                RoundedRectangle:
+                    pos: self.pos
+                    size: self.size
+                    radius: [dp(20)]
+
+
+            #header bar
+            BoxLayout:
+                size_hint_y: None
+                height: dp(35)
+                canvas.before:
+                    Color:
+                        rgba: utils.get_color_from_hex('#3A5A40') # Muted green accent header
+                    RoundedRectangle:
+                        pos: self.pos
+                        size: self.size
+                        radius: [dp(12), dp(12), 0, 0]
+
+
+                Label:
+                    text: 'TOTAL RACKS'
+                    bold: True
+                    font_size: '15sp'
+                    color: utils.get_color_from_hex(app.text_color2)
+                Label:
+                    text: 'AVG INNINGS/RACK'
+                    bold: True
+                    font_size: '15sp'
+                    color: utils.get_color_from_hex(app.text_color2)
+
+            # values row
+            BoxLayout:
+                orientation: 'horizontal'
+                Label:
+                    text: str(app.match_count)
+                    font_size: '32sp'
+                    bold: True
+                    color: utils.get_color_from_hex(app.text_color1)
+                Label:
+                    text: f'{app.innings/app.match_count:.1f}'
+                    font_size: '32sp'
+                    bold: True
+                    color: utils.get_color_from_hex(app.text_color1)
+
+        Widget:
+            size_hint_y: 1
+
+        BoxLayout:
+            orientation: 'vertical'
+            size_hint_y: None
+
+            GoldButton:
+                text: 'Return to Menu'
+                size_hint: (1, None)
+                text_color: app.text_color2
+                height: dp(40)
+                font_size: '16sp'
+                pos_hint: {'center_x': 0.5}
+                on_release: root.quit_game()

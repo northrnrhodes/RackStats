@@ -1,0 +1,263 @@
+#:import utils kivy.utils
+
+
+#gameplay clock design
+<CLockWidget@BoxLayout>:
+    #makes elements side by side
+    orientation: 'horizontal'
+    pos_hint: {'center_y': 0.5}
+
+    # add space between play/pause icons and timer text
+    spacing: 10
+     # adds a little padding on the sides
+    padding: [10, 0, 10, 0]
+    size_hint_y: None
+    #makes widget only take up 35% of screen
+    size_hint_x: 0.28
+    height: dp(50)
+    #centers the widget
+    pos_hint: {'center_x': 0.5}
+
+    canvas.before:
+        #set border color
+        Color:
+            rgba: utils.get_color_from_hex(app.text_color2)
+        Line:
+            #draw rounded rectangle
+            rounded_rectangle: (self.x, self.y, self.width, self.height, 20)
+            width: 2.5
+
+    ImageButton:
+        id: play_pause_btn
+        size_hint: None, None
+        size: '25dp', '25dp'
+        pos_hint: {'center_y': 0.5}
+        allow_stretch: True
+        keep_ratio: True
+        source: 'images/pause.png' if app.is_running else 'images/play.png'
+        on_release: app.start_timer() if not app.is_running else app.stop_timer()
+
+
+    Label:
+        text: app.timer_text
+        font_size: '24sp'
+        valign: 'middle'
+        color: utils.get_color_from_hex(app.text_color2)
+
+
+
+# --- CUSTOM BUTTON DESIGN ---
+<GoldButton@Button>:
+    text_alpha: 1.0  # <--- Add this property for text-only fading
+    btn_color: app.charcoal2 if (app and hasattr(app, 'app.charcoal2') and app.charcoal2) else '#1A2123'
+    text_color: app.text_color1 if (app and hasattr(app, 'app.text_color1') and app.text_color1) else '#4CEB63'
+    # Remove the default Kivy grey button background
+    background_color: 0, 0, 0, 0
+    background_normal: ''
+
+    # 2. The suppressed tap animation
+    opacity: 0.6 if self.state == 'down' else 1.0
+
+    # Text styling
+    color: utils.get_color_from_hex(self.text_color if (self.text_color and isinstance(self.text_color, str)) else '#4CEB63')[:3] + [self.text_alpha]
+    bold: True
+    font_size: '30sp'
+
+    # Sizing (Fixed size so they look uniform)
+    size_hint: None, None
+    size: dp(260), dp(100)
+    pos_hint: {'center_x': 0.5}
+
+    # Drawing the rounded rectangle and border
+    canvas.before:
+        Color:
+            rgba: utils.get_color_from_hex(self.btn_color if (self.btn_color and isinstance(self.btn_color, str)) else '#1A2123')
+        RoundedRectangle:
+            size: self.size
+            pos: self.pos
+            radius: [dp(15)] # The curve of the corners
+
+        # Optional: Adds the thin light border seen in your mockup
+        Color:
+            rgba: 1, 1, 1, 0.6
+        Line:
+            width: dp(1.0)
+            rounded_rectangle: (self.x, self.y, self.width, self.height, dp(15))
+
+
+
+#player cards on match screen
+# --- PLAYER SLOT COMPONENT ---
+<PlayerBox@BoxLayout>:
+   # Create a property to pass the title (Player 1 or Player 2)
+    player_name: ''
+    is_active: False
+    defensive_count: 0
+    wins_count: 0
+    orientation: 'vertical'
+    size_hint_y: None
+    height: dp(140) # Fixed height prevents collapsing
+
+
+    canvas.before:
+        Color:
+            rgba: (1, 1, 1, 0.2) if root.is_active else (0, 0, 0, 0)
+        Rectangle:
+            size: self.size
+            pos: self.pos
+
+
+
+       #Dynamic border color (Bright amber when active, subtle faint white/grey when inactive)
+        Color:
+            rgba: utils.get_color_from_hex(app.text_color2) if root.is_active else (1, 1, 1, 0.15)
+
+        # Dynamic border width (Slightly thicker when active to make it pop)
+        Line:
+            width: dp(2.0) if root.is_active else dp(1.0)
+            rounded_rectangle: (self.x, self.y, self.width, self.height, dp(10))
+
+    Label:
+        text: root.player_name
+        font_size: '30sp'
+        color: utils.get_color_from_hex(app.text_color1) if root.is_active else utils.get_color_from_hex(app.text_color2)
+        text_size: (self.width, self.height) # Forces the label to fill the box
+        halign: 'center'
+        valign: 'top' # Pins text to the top
+        padding: [0, 10, 0, 0] # Small offset to keep text off the border
+
+
+    BoxLayout:
+        orientation: 'horizontal'
+        size_hint_y: 0.5 # Takes up half the remaining space
+        spacing: dp(10)
+        padding: [dp(20), 0, dp(20), 0]
+
+        Image:
+            source: 'images/trophy.png'
+            size_hint_x: None
+            width: dp(25)
+            allow_stretch: True
+            keep_ratio: True
+
+        Label:
+            text: str(root.wins_count)
+            font_size: '20sp'
+            color: utils.get_color_from_hex(app.text_color2)
+            # ### CHANGED: Set size_hint_x to fill space between icons
+            size_hint_x: 0.5
+
+        Image:
+            source: 'images/shield.png'
+            size_hint_x: None
+            width: dp(25)
+            allow_stretch: True
+            keep_ratio: True
+
+        Label:
+            text: str(root.defensive_count)
+            font_size: '20sp'
+            color: utils.get_color_from_hex(app.text_color2)
+            # ### CHANGED: Set size_hint_x to fill space between icons
+            size_hint_x: 0.5
+
+    Widget: # Pushes everything to the top
+        size_hint_y: .1
+
+
+#toggle for playing safeties
+<SafetyToggle@ToggleButton>
+    # Remove the default Kivy grey button background
+    background_color: 0, 0, 0, 0
+    background_normal: ''
+
+    # Text styling (Dark blue text to match the app background)
+    color: utils.get_color_from_hex(app.text_color2)
+    bold: True
+    font_size: '22sp'
+
+    # Sizing (Fixed size so they look uniform)
+    size_hint: None, None
+    size: dp(260), dp(100)
+    pos_hint: {'center_x': 0.5}
+
+    # Drawing the rounded rectangle and border
+    canvas.before:
+        Color:
+            rgba: utils.get_color_from_hex(app.charcoal_2) if self.state == "normal" else (1,1,1,1)
+        RoundedRectangle:
+            size: self.size
+            pos: self.pos
+            radius: [dp(15)] # The curve of the corners
+
+        # Optional: Adds the thin light border seen in your mockup
+        Color:
+            rgba: 1, 1, 1, 0.6
+        Line:
+            width: dp(1.0)
+            rounded_rectangle: (self.x, self.y, self.width, self.height, dp(15))
+
+
+
+#navbar on matchscreens
+<NavBar@BoxLayout>
+    id: nav_bar
+    game_type: app.game_type
+    match_time: app.match_time
+    padding: [dp(15), dp(0), dp(15), dp(0)]
+    spacing: dp(10)
+
+
+    orientation: 'horizontal'
+    size_hint_y: None
+    height: dp(45)
+    #bottom seperator line
+    canvas.before:
+        Color:
+            rgba: utils.get_color_from_hex(app.text_color2)
+        Rectangle:
+            pos: self.x, self.y
+            #set width to take up entire screen and thickness of line to dp(2)
+            size: self.width, dp(2)
+    BoxLayout:
+        size_hint_x: 0.25
+        Button:
+            text: '< Menu'
+            font_size: '18sp'
+            size_hint_x: 1
+            background_color: 0, 0, 0, 0
+            color: utils.get_color_from_hex(app.text_color2)
+            on_release: app.menu_button()
+
+    Label:
+        text: root.game_type
+        color: utils.get_color_from_hex(app.text_color1)
+        size_hint_x: 0.5
+        font_size: '18sp'
+        bold: True
+        text_size: self.size
+        halign: 'center'
+        valign: 'middle'
+
+    BoxLayout:
+        size_hint_x: 0.25
+        Label:
+            text: root.match_time
+            color: utils.get_color_from_hex(app.text_color2)
+            size_hint_x: 1
+            font_size: '18sp'
+            halign: 'right'
+            valign: 'middle'
+
+
+#balls remaining selector balls
+<PoolBallToggle@ToggleButtonBehavior+Image>:
+    #image constraints
+    allow_stretch: True
+    keep_ratio: True
+
+    # 2. Automatically drop the opacity to 50% when selected
+    opacity: 0.2 if self.state == 'down' else 1.0
+
+    # 3. Keep the size constraints so they scale perfectly
+    size_hint: (1, 1)

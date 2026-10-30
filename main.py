@@ -1,17 +1,16 @@
-from kivy.app import App
+import kivy.core.window
 from kivy.lang import Builder
 from kivy.clock import Clock
 import utils
-from screens import *
+from match_recovery import ResumeMatch
 from screens import ExitGamePopup
-from screens import ResumeMatch
-from kivy.core.window import Window
-from kivy.properties import ListProperty, StringProperty, NumericProperty, BooleanProperty, ObjectProperty, DictProperty
+from kivy.properties import BooleanProperty, ObjectProperty, DictProperty, ListProperty, StringProperty, NumericProperty
 from data import *
 from kivy.uix.behaviors import ButtonBehavior
 from kivy.uix.image import Image
 from utils import *
 from kivy.app import App
+from kivy.core.window import Window
 
 
 #runs watchdog and window max restrictions
@@ -73,7 +72,7 @@ class BilliardsScorekeeping(App):
     main_color = StringProperty('#121718') #charcoal grey main canvas
     charcoal_2 = StringProperty('#1A2123')#button/card fills
     popup_bg = StringProperty('#5A5A5A')
-    # grey_green = StringProperty('#3A5A48') #secondary grey/green
+    grey_green = StringProperty('#3A5A48') #secondary grey/green
     text_color1 = StringProperty('#4CEB63') #mint green for text
     text_color2 = StringProperty('#FF9F43') #amber/neon orange for text and border highlights
     # accent_color = StringProperty('#FFB259') #bright orange

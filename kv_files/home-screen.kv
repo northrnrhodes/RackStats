@@ -1,43 +1,6 @@
 #:import utils kivy.utils
 #:import Animation kivy.animation.Animation
 
-# --- CUSTOM BUTTON DESIGN ---
-<GoldButton@Button>:
-    text_alpha: 1.0  # <--- Add this property for text-only fading
-    btn_color: app.charcoal2 if (app and hasattr(app, 'app.charcoal2') and app.charcoal2) else '#1A2123'
-    text_color: app.text_color1 if (app and hasattr(app, 'app.text_color1') and app.text_color1) else '#4CEB63'
-    # Remove the default Kivy grey button background
-    background_color: 0, 0, 0, 0
-    background_normal: ''
-
-    # 2. The suppressed tap animation
-    opacity: 0.6 if self.state == 'down' else 1.0
-
-    # Text styling
-    color: utils.get_color_from_hex(self.text_color if (self.text_color and isinstance(self.text_color, str)) else '#4CEB63')[:3] + [self.text_alpha]
-    bold: True
-    font_size: '30sp'
-
-    # Sizing (Fixed size so they look uniform)
-    size_hint: None, None
-    size: dp(260), dp(100)
-    pos_hint: {'center_x': 0.5}
-
-    # Drawing the rounded rectangle and border
-    canvas.before:
-        Color:
-            rgba: utils.get_color_from_hex(self.btn_color if (self.btn_color and isinstance(self.btn_color, str)) else '#1A2123')
-        RoundedRectangle:
-            size: self.size
-            pos: self.pos
-            radius: [dp(15)] # The curve of the corners
-
-        # Optional: Adds the thin light border seen in your mockup
-        Color:
-            rgba: 1, 1, 1, 0.6
-        Line:
-            width: dp(1.0)
-            rounded_rectangle: (self.x, self.y, self.width, self.height, dp(15))
 
 # --- MAIN SCREEN LAYOUT ---
 <HomeScreen>:
