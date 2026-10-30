@@ -14,6 +14,7 @@ class Player(EventDispatcher):
     user_id = StringProperty(None)
     safeties = NumericProperty(0)
     wins = NumericProperty(0)
+    turns = NumericProperty(0)
 
     #records balls made per rack, length of list is total games played
     balls_made = NumericProperty(0)

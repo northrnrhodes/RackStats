@@ -104,9 +104,7 @@ class ExitGamePopup(Popup):
 #shows game end summary popup with match stats
 class GameEndSummary(Popup):
     def calculate_shooting_percentage(self, player):
-        app = App.get_running_app()
-
-        misses = max(0, app.innings - player.safeties)
+        misses = max(0, player.turns - player.safeties)
         attempts = misses + player.balls_made
         shooting_percentage = (player.balls_made/ attempts * 100) if attempts > 0 else 0
         return f'{shooting_percentage:.1f}'

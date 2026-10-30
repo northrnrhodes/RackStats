@@ -164,6 +164,7 @@ class MatchScreen8(Screen):
         app.turns += 1
         app.rack_turn_count += 1
         app.innings = app.turns // 2
+        app.current_player.turns = +1
         # --- Switch current_player object reference directly ---
         app.current_player = app.player2 if app.current_player == app.player1 else app.player1
         if app.played_safe == True:
@@ -219,8 +220,10 @@ class MatchScreen8(Screen):
             # 2. Revert the temporary UI app variable displayed on screen
             if turn_player == app.player1.name:
                 app.p1_safe -= 1
+                app.player1.turns -= 1
             else:
                 app.p2_safe -= 1
+                app.player2.turns -= 1
 
         # --- Revert current_player safely using the turn's owner ---
         if turn_player == app.player1.name:
